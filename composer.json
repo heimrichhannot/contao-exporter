@@ -1,0 +1,33 @@
+{
+    "name": "heimrichhannot/contao-exporter",
+    "description":"A backend module for export configurations",
+    "keywords":["contao", "export", "backend", "module", "developer", "xls", "csv"],
+    "type": "contao-module",
+    "homepage":"https://github.com/heimrichhannot/contao-exporter",
+    "license":"LGPL-3.0+",
+    "authors":[
+        {
+            "name":"Heimrich & Hannot",
+            "email":"digitales@heimrich-hannot.de",
+            "homepage":"http://www.heimrich-hannot.de",
+            "role":"Developer"
+        }
+    ],
+    "support":{
+        "issues":"https://github.com/heimrichhannot/contao-exporter/issues"
+    },
+    "require": {
+        "contao/core": ">=3.2,<4-dev",
+		"phpoffice/phpexcel": ">=1.8.1"
+    },
+    "autoload": {
+        "classmap": [""]
+    },
+    "extra": {
+        "contao": {
+            "sources": {
+                "": "system/modules/exporter"
+            }
+        }
+    }
+}
