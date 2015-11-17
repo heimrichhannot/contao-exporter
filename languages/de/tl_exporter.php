@@ -8,16 +8,16 @@ $arrLang = &$GLOBALS['TL_LANG']['tl_exporter'];
 $arrLang['title'] = array('Titel', 'Geben Sie hier den Titel für die Export-Konfiguration ein.');
 // table legend
 $arrLang['globalOperationKey'] = array('Globale Operation', 'Wählen Sie hier die Operation aus, die den Export auslösen soll.');
-$arrLang['linkedTable'] = array('Verknüpfte Tabelle', 'Wählen Sie hier die Tabelle aus, welche exportiert werden soll.');
-$arrLang['tableFieldsForExport'] = array('Felder', 'Wählen Sie hier die Felder aus, welche exportiert werden sollen.');
+$arrLang['linkedTable'] = array('Verknüpfte Tabelle', 'Wählen Sie hier die Tabelle aus, die exportiert werden soll.');
+$arrLang['tableFieldsForExport'] = array('Felder', 'Wählen Sie hier die Felder aus, die exportiert werden sollen.');
 // export legend
-$arrLang['fileType'] = array('Dateiformat', 'Wählen Sie hier das Dateiformat, in welches exportiert werden soll.');
+$arrLang['fileType'] = array('Dateiformat', 'Wählen Sie hier das Dateiformat, in das exportiert werden soll.');
 $arrLang['fieldDelimiter'] = array('Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.');
 $arrLang['fieldEnclosure'] = array('Text-Trennzeichen', 'Geben Sie hier das Text-Trennzeichen ein.');
-$arrLang['addHeaderToExportTable'] = array('Feldnamen im Tabellenkopf anzeigen', 'Wählen Sie hier, ob im Tabellenkopf die Feldnamen eingetragen werden sollen.');
+$arrLang['addHeaderToExportTable'] = array('Feldnamen im Tabellenkopf anzeigen', 'Wählen Sie diese Option, wenn der Tabelle ein Tabellenkopf hinzugefügt werden soll.');
 // localization
-$arrLang['localizeHeader'] = array('Tabellenkopf lokalisieren', 'Wählen Sie hier, ob die Feldnamen lokalisiert werden sollen. Hat nur Auswirkungen, wenn Tabellenkopf angezeigt wird.');
-$arrLang['localizeFields'] = array('Tabellenwert lokalisieren', 'Wählen Sie hier, ob die Feldwerte lokalisiert werden sollen.');
+$arrLang['localizeHeader'] = array('Tabellenkopf lokalisieren', 'Wählen Sie diese Option, wenn die Feldnamen im Tabellenkopf lokalisiert werden sollen.');
+$arrLang['localizeFields'] = array('Feldwerte lokalisieren', 'Wählen Sie diese Option, wenn die Feldwerte lokalisiert werden sollen.');
 
 
 /**

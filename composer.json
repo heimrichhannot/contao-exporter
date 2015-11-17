@@ -1,6 +1,6 @@
 {
     "name": "heimrichhannot/contao-exporter",
-    "description":"A backend module for export configurations",
+    "description":"A backend module for exporting any contao entity to file.",
     "keywords":["contao", "export", "backend", "module", "developer", "xls", "csv"],
     "type": "contao-module",
     "homepage":"https://github.com/heimrichhannot/contao-exporter",

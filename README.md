@@ -1,40 +1,32 @@
 # Exporter
 
-A backend module for export configurations.
-
-## Entities
-- tl_exporter
-
+A backend module for exporting any contao entity.
 
 ## How to use
 
-STEP I
-- Go to your dca file
-- Define your global operation as usually and set 'href' to 'key=export'
+### Step 1
+Define your global operation in your entity's dca as follows:
+
 ```
 'global_operations' => array
 (
-	'export' => array
-	(
-		'href' => 'key=export'
-	),
-	'export_xls' => array
-	(
-		'href' => 'key=export_xls'
-	),
+	'export' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export',
+                'system/modules/mymodule/assets/img/icon_export.png'),
+	'export_xls' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export_xls',
+                'system/modules/mymodule/assets/img/icon_export.png')
 ),
 ```
 
-STEP II
-- Go to your config.php
-- Add your backend module as usually and set the 'export'-function for the global operations
+### Step 2
+Add your backend module in your entity's config.php as follows:
+
 ```
-'my_be_module' => array
+$GLOBALS['BE_MOD']['mygroup'] = array
 (
-	'export' => array('\HeimrichHannot\Exporter\Exporter', 'export'),
-	'export_xls' => array('\HeimrichHannot\Exporter\Exporter', 'export')
+    'export' => \HeimrichHannot\Exporter\Exporter::getBackendModule(),
+    'export_xls' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
 ),
 ```
 
-STEP III
-- Create a configuration in the backend for the global operation and table
+### Step 3
+Create a configuration for your export by using the exporter's backend module (group devtools).

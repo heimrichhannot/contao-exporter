@@ -170,4 +170,27 @@ class Exporter
 		return $arrOptions;
 	}
 
+	public static function getGlobalOperation($strName, $strIcon = '', $strLabel = null)
+	{
+		$arrOperation = array
+		(
+			'href'       => 'key=' . $strName,
+			'class'      => 'header_' . $strName . '_entities',
+			'icon'       => $strIcon,
+			'attributes' => 'onclick="Backend.getScrollOffset()"'
+		);
+
+		if ($strLabel)
+			$arrOperation['label'] = &$strLabel;
+		else
+			$arrOperation['label'] = &$GLOBALS['TL_LANG']['tl_competition_submission'][$strName];
+
+		return $arrOperation;
+	}
+
+	public static function getBackendModule()
+	{
+		return array('\HeimrichHannot\Exporter\Exporter', 'export');
+	}
+
 }
