@@ -22,8 +22,7 @@ Add your backend module in your entity's config.php as follows:
 ```
 $GLOBALS['BE_MOD']['mygroup'] = array
 (
-    'export' => \HeimrichHannot\Exporter\Exporter::getBackendModule(),
-    'export_xls' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
+    'export' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
 ),
 ```
 

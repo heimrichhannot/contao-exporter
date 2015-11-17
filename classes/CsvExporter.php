@@ -86,9 +86,11 @@ class CsvExporter
 	{
 		$arrFields = array();
 
+		\System::loadLanguageFile($this->strTable);
+
 		foreach ($arrExportFields as $strField)
 		{
-			$strFieldName = $GLOBALS['TL_LANG']['tl_competition_submission'][$strField][0];
+			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$strField]['label'][0];
 			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField);
 		}
 
