@@ -10,9 +10,8 @@ Define your global operation in your entity's dca as follows:
 ```
 'global_operations' => array
 (
-	'export' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export',
-                'system/modules/mymodule/assets/img/icon_export.png'),
-	'export_xls' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export_xls',
+    'export' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export',
+                $GLOBALS['TL_LANG']['tl_my_entity']['export'],
                 'system/modules/mymodule/assets/img/icon_export.png')
 ),
 ```

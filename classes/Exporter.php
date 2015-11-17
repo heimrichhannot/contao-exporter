@@ -123,29 +123,40 @@ class Exporter
 		{
 			$arrExportConfigs = ExporterModel::findByKeyAndTable($this->strGlobalOperationKey, $this->strExportTable);
 
-			foreach ($arrExportConfigs as $objExportConfig)
+			if (!$arrExportConfigs)
 			{
-				switch($objExportConfig->fileType)
+				if (empty($_SESSION['TL_ERROR']))
 				{
-					case 'csv' :
-						$objCsvExporter = new CsvExporter();
-						$objCsvExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-						$objCsvExporter->setExportFields($objExportConfig->tableFieldsForExport);
-						$objCsvExporter->export($this->strExportTable);
-						break;
-
-					case 'xls' :
-						$objXlsExporter = new XlsExporter();
-						$objXlsExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-						$objXlsExporter->setExportFields($objExportConfig->tableFieldsForExport);
-						$objXlsExporter->export($this->strExportTable);
-						break;
-
-					default :
-						continue;
+					\Message::addError($GLOBALS['TL_LANG']['MSC']['exporter']['noConfigFound']);
+					\Controller::redirect($_SERVER['HTTP_REFERER']);
 				}
 			}
-			die();
+			else
+			{
+				foreach ($arrExportConfigs as $objExportConfig)
+				{
+					switch($objExportConfig->fileType)
+					{
+						case 'csv' :
+							$objCsvExporter = new CsvExporter();
+							$objCsvExporter->setOptions($this->setOptionsForExporter($objExportConfig));
+							$objCsvExporter->setExportFields($objExportConfig->tableFieldsForExport);
+							$objCsvExporter->export($this->strExportTable);
+							break;
+
+						case 'xls' :
+							$objXlsExporter = new XlsExporter();
+							$objXlsExporter->setOptions($this->setOptionsForExporter($objExportConfig));
+							$objXlsExporter->setExportFields($objExportConfig->tableFieldsForExport);
+							$objXlsExporter->export($this->strExportTable);
+							break;
+
+						default :
+							continue;
+					}
+				}
+				die();
+			}
 		}
 	}
 
@@ -170,20 +181,16 @@ class Exporter
 		return $arrOptions;
 	}
 
-	public static function getGlobalOperation($strName, $strIcon = '', $strLabel = null)
+	public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
 	{
 		$arrOperation = array
 		(
+			'label'      => &$strLabel,
 			'href'       => 'key=' . $strName,
 			'class'      => 'header_' . $strName . '_entities',
 			'icon'       => $strIcon,
 			'attributes' => 'onclick="Backend.getScrollOffset()"'
 		);
-
-		if ($strLabel)
-			$arrOperation['label'] = &$strLabel;
-		else
-			$arrOperation['label'] = &$GLOBALS['TL_LANG']['tl_competition_submission'][$strName];
 
 		return $arrOperation;
 	}
