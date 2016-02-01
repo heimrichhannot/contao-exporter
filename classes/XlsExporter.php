@@ -91,8 +91,11 @@ class XlsExporter
 
 		foreach ($arrExportFields as $strField)
 		{
-			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$strField]['label'][0];
-			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField);
+			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
+			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
+
+			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
+			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
 		}
 
 		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
@@ -144,8 +147,17 @@ class XlsExporter
 	 */
 	protected function exportToDownload()
 	{
+		$arrExportFields = array();
+		foreach ($this->arrExportFields as $strField)
+		{
+			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
+				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField . EXPORTER_RAW_FIELD_SUFFIX;
+			else
+				$arrExportFields[] = $strField;
+		}
+
 		$objDbResult = \Database::getInstance()->prepare(
-			"SELECT " . implode(',', $this->arrExportFields) .
+			"SELECT " . implode(',', $arrExportFields) .
 			" FROM " . $this->strTable
 		)->execute();
 

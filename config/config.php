@@ -1,6 +1,11 @@
 <?php
 
 /**
+ * Constants
+ */
+define('EXPORTER_RAW_FIELD_SUFFIX', 'ERawE');
+
+/**
  * Back end modules
  */
 array_insert(

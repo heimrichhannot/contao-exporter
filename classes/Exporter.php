@@ -97,15 +97,25 @@ class Exporter
 			{
 				return $arrOptions;
 			}
+
 			foreach ($arrFields as $arrField)
 			{
-				if (in_array($arrField['type'], $arrSkipFields))
-				{
-					continue;
-				}
-				$arrOptions[$arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']';
+				if (!in_array($arrField['type'], $arrSkipFields))
+					$arrOptions[$arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']';
 			}
 		}
+
+		$arrOptionsRawKeys= array_map(function($val) {
+			return $val . EXPORTER_RAW_FIELD_SUFFIX;
+		}, array_keys($arrOptions));
+
+		$arrOptionsRawValues = array_map(function($val) {
+			return $val . $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'];
+		}, array_values($arrOptions));
+
+		$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
+
+		asort($arrOptions);
 
 		return $arrOptions;
 	}
