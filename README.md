@@ -66,4 +66,4 @@ tableFieldsForExport | The table's fields to export (in most cases divided in fo
 Name | Arguments | Expected return value | Description
 ---- | --------- | --------------------- | -----------
 exporter_modifyHeaderFields | $arrFields, $objExporter | $arrFields | Modify the header fields just before just before being written to file
-exporter_modifyMediaFilename | $objFile, $objMediaExporter | $objFile->path | Modify a filename just before added to the archive when using *MediaExporter* (also folder structure could be modified here)
+exporter_modifyMediaFilename | $objFile, $strFieldname, $varFieldValue, $objMediaExporter | $objFile->path | Modify a filename just before added to the archive when using *MediaExporter* (also folder structure could be modified here)

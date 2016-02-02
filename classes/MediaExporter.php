@@ -11,6 +11,7 @@
 
 namespace HeimrichHannot\Exporter;
 
+use Contao\DC_Table;
 use Contao\ZipWriter;
 use HeimrichHannot\Haste\Util\Files;
 
@@ -121,6 +122,8 @@ class MediaExporter
 				break;
 		}
 
+		$arrDcaFields = $GLOBALS['TL_DCA'][$this->strTable]['fields'];
+
 		// write files
 		while ($objDbResult->next())
 		{
@@ -128,29 +131,39 @@ class MediaExporter
 
 			foreach ($arrRow as $key => $varValue)
 			{
-				if (($objFile = Files::getFileFromUuid($varValue)) !== null)
-				{
-					if (isset($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']))
-					{
-						foreach ($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename'] as $callback)
-						{
-							$objCallback = \System::importStatic($callback[0]);
-							$strFixedFilename = $objCallback->$callback[1]($objFile, $this);
+				$objDc = new DC_Table($this->strTable);
+				$objDc->activeRecord = $objDbResult;
+				$varValue = Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc);
 
-							if ($strFixedFilename)
+				if (!is_array($varValue))
+					$varValue = array($varValue);
+
+				foreach ($varValue as $strPath)
+				{
+					if ($strPath && ($objFile = new \File($strPath)) !== null)
+					{
+						if (isset($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']))
+						{
+							foreach ($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename'] as $callback)
 							{
-								$strTmpFixedFilename = $strTmpFolder . '/' . ltrim($strFixedFilename, '/');
-								$objFile->copyTo($strTmpFixedFilename);
-								$objFile->path = $strTmpFixedFilename;
+								$objCallback = \System::importStatic($callback[0]);
+								$strFixedFilename = $objCallback->$callback[1]($objFile, $key, $strPath, $this);
+
+								if ($strFixedFilename)
+								{
+									$strTmpFixedFilename = $strTmpFolder . '/' . ltrim($strFixedFilename, '/');
+									$objFile->copyTo($strTmpFixedFilename);
+									$objFile->path = $strTmpFixedFilename;
+								}
 							}
 						}
-					}
 
-					switch ($this->strCompressionType)
-					{
-						default:
-							$objZip->addFile($objFile->path);
-							break;
+						switch ($this->strCompressionType)
+						{
+							default:
+								$objZip->addFile($objFile->path);
+								break;
+						}
 					}
 				}
 			}

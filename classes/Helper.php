@@ -48,6 +48,20 @@ class Helper
 			$value = \Date::parse(\Config::get('timeFormat'), $value);
 		} elseif ($rgxp == 'datim') {
 			$value = \Date::parse(\Config::get('datimFormat'), $value);
+		} elseif ($arrData['inputType'] == 'multifileupload') {
+			if (is_array($value)) {
+				$value = array_map(
+						function ($val) {
+							$strPath = Files::getPathFromUuid($val);
+
+							return $strPath ?: $val;
+						},
+						$value
+				);
+			} else {
+				$strPath = Files::getPathFromUuid($value);
+				$value   = $strPath ?: $value;
+			}
 		} elseif (is_array($value)) {
 			$value = static::flattenArray($value);
 
@@ -70,7 +84,8 @@ class Helper
 			$value = isset($opts[$value]) ? $opts[$value] : $value;
 		} elseif (is_array($rfrc)) {
 			$value = isset($rfrc[$value]) ? ((is_array($rfrc[$value])) ? $rfrc[$value][0] : $rfrc[$value]) : $value;
-		} elseif ($arrData['inputType'] == 'fileTree') {
+		}
+		elseif ($arrData['inputType'] == 'fileTree') {
 			if ($arrData['eval']['multiple'] && is_array($value)) {
 				$value = array_map(
 						function ($val) {
@@ -89,7 +104,7 @@ class Helper
 		}
 
 		// Convert special characters (see #1890)
-		return specialchars($value);
+		return is_array($value) ? $value: specialchars($value);
 	}
 
 	public static function flattenArray(array $array)

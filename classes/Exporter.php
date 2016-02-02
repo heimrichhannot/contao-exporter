@@ -114,9 +114,7 @@ class Exporter
 			return $val . ($blnIsMediaExport ? '' : $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted']);
 		}, array_values($arrOptions));
 
-		if ($blnIsMediaExport)
-			$arrOptions = array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
-		else
+		if (!$blnIsMediaExport)
 			$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
 
 		asort($arrOptions);
