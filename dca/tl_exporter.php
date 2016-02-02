@@ -86,16 +86,16 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 		'__selector__' => array('fileType'),
 		'default' => '
 		{title_legend},title;
-		{table_legend},globalOperationKey,linkedTable,tableFieldsForExport;
 		{export_legend},fileType;
-		{localization_legend},localizeHeader,localizeFields;',
+		{table_legend},globalOperationKey,linkedTable,tableFieldsForExport;',
 	),
 
 	// Subpalettes
 	'subpalettes' => array
 	(
-		'fileType_csv' => 'fieldDelimiter,fieldEnclosure,addHeaderToExportTable',
-		'fileType_xls' => 'addHeaderToExportTable'
+		'fileType_csv' => 'fieldDelimiter,fieldEnclosure,addHeaderToExportTable,localizeHeader,localizeFields',
+		'fileType_xls' => 'addHeaderToExportTable,localizeHeader,localizeFields',
+		'fileType_media' => 'compressionType'
 	),
 
 	// Fields
@@ -177,16 +177,16 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
 			'exclude' => true,
 			'inputType' => 'select',
-			'options' => array('csv', 'xls'),
+			'options' => array(EXPORTER_FILE_TYPE_CSV, EXPORTER_FILE_TYPE_XLS, EXPORTER_FILE_TYPE_MEDIA),
+			'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
 			'eval' => array
 			(
-				'maxlength' => 4,
 				'mandatory' => true,
 				'includeBlankOption' => true,
 				'submitOnChange' => true,
 				'tl_class' => 'w50',
 			),
-			'sql' => "varchar(4) NOT NULL default ''"
+			'sql' => "varchar(255) NOT NULL default ''"
 		),
 		'fieldDelimiter'   => array
 		(
@@ -196,6 +196,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'sorting' => true,
 			'flag' => 1,
 			'inputType' => 'text',
+			'default' => ',',
 			'eval' => array
 			(
 				'mandatory' => true,
@@ -212,6 +213,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'sorting' => true,
 			'flag' => 1,
 			'inputType' => 'text',
+			'default' => '"',
 			'eval' => array
 			(
 				'mandatory' => true,
@@ -229,8 +231,20 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 				'tl_class' => 'w50 clr'),
 			'sql' => "char(1) NOT NULL default ''"
 		),
-
-		// localization
+		'compressionType' => array
+		(
+			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['compressionType'],
+			'exclude' => true,
+			'inputType' => 'select',
+			'options' => array('zip'),
+			'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['compressionType'],
+			'eval' => array
+			(
+				'mandatory' => true,
+				'tl_class' => 'w50',
+			),
+			'sql' => "varchar(255) NOT NULL default ''"
+		),
 		'localizeHeader' => array
 		(
 			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['localizeHeader'],

@@ -13,7 +13,7 @@ namespace HeimrichHannot\Exporter;
 
 use Contao\DC_Table;
 
-class XlsExporter
+class XlsExporter extends Exporter
 {
 	protected $blnAddHeader;
 	protected $blnLocalizeHeader;
@@ -36,7 +36,7 @@ class XlsExporter
 
 
 	/**
-	 * Sets the option for the CSV-exporter
+	 * Sets the options for the exporter
 	 *
 	 * @param array $arrOptions
 	 */
@@ -79,39 +79,6 @@ class XlsExporter
 
 
 	/**
-	 * Sets and localizes the header fields
-	 *
-	 * @param $arrExportFields
-	 */
-	protected function setHeaderFields($arrExportFields)
-	{
-		$arrFields = array();
-
-		\System::loadLanguageFile($this->strTable);
-
-		foreach ($arrExportFields as $strField)
-		{
-			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
-			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
-
-			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
-			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
-		}
-
-		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
-		{
-			foreach ($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields'] as $callback)
-			{
-				$objCallback = \System::importStatic($callback[0]);
-				$arrFields = $objCallback->$callback[1]($arrFields);
-			}
-		}
-
-		$this->arrHeaderFields = $arrFields;
-	}
-
-
-	/**
 	 * Prepares the export
 	 *
 	 * @param $strTable
@@ -147,11 +114,13 @@ class XlsExporter
 	 */
 	protected function exportToDownload()
 	{
+		$strTmpFile = 'system/tmp/' . $this->strFileName;
 		$arrExportFields = array();
+
 		foreach ($this->arrExportFields as $strField)
 		{
 			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
-				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField . EXPORTER_RAW_FIELD_SUFFIX;
+				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
 			else
 				$arrExportFields[] = $strField;
 		}
@@ -203,11 +172,11 @@ class XlsExporter
 		$this->objXls->getActiveSheet()->setTitle('Export');
 
 		// send file to browser
-		header('Content-Type: application/vnd.ms-excel');
-		header('Content-Disposition: attachment;filename=' . $this->strFileName);
-
 		$objWriter = \PHPExcel_IOFactory::createWriter($this->objXls, 'Excel5');
-		$objWriter->save('php://output');
+		$objWriter->save(TL_ROOT . '/' . $strTmpFile);
+
+		$objFile = new \File($strTmpFile);
+		$objFile->sendToBrowser();
 	}
 
 

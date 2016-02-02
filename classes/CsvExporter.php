@@ -12,8 +12,9 @@
 namespace HeimrichHannot\Exporter;
 
 use Contao\DC_Table;
+use HeimrichHannot\Haste\Util\Files;
 
-class CsvExporter
+class CsvExporter extends Exporter
 {
 	protected $blnAddHeader;
 	protected $blnLocalizeHeader;
@@ -35,7 +36,7 @@ class CsvExporter
 
 
 	/**
-	 * Sets the option for the CSV-exporter
+	 * Sets the options for the exporter
 	 *
 	 * @param array $arrOptions
 	 */
@@ -78,36 +79,6 @@ class CsvExporter
 
 
 	/**
-	 * Sets and localizes the header fields
-	 *
-	 * @param $arrExportFields
-	 */
-	protected function setHeaderFields($arrExportFields)
-	{
-		$arrFields = array();
-
-		\System::loadLanguageFile($this->strTable);
-
-		foreach ($arrExportFields as $strField)
-		{
-			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$strField]['label'][0];
-			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField);
-		}
-
-		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyCsvHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyCsvHeaderFields']))
-		{
-			foreach ($GLOBALS['TL_HOOKS']['exporter_modifyCsvHeaderFields'] as $callback)
-			{
-				$objCallback = \System::importStatic($callback[0]);
-				$arrFields = $objCallback->$callback[1]($arrFields);
-			}
-		}
-
-		$this->arrHeaderFields = $arrFields;
-	}
-
-
-	/**
 	 * Prepares the export
 	 *
 	 * @param $strTable
@@ -143,9 +114,20 @@ class CsvExporter
 	 */
 	protected function exportToDownload()
 	{
+		$strTmpFile = 'system/tmp/' . $this->strFileName;
+
+		$arrExportFields = array();
+		foreach ($this->arrExportFields as $strField)
+		{
+			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
+				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
+			else
+				$arrExportFields[] = $strField;
+		}
+
 		$objDbResult = \Database::getInstance()->prepare(
-			"SELECT " . implode(',', $this->arrExportFields) .
-			" FROM " . $this->strTable
+				"SELECT " . implode(',', $arrExportFields) .
+				" FROM " . $this->strTable
 		)->execute();
 
 		if (!$objDbResult->numRows > 0)
@@ -192,14 +174,14 @@ class CsvExporter
 		$this->objCsv->getActiveSheet()->setTitle('Export');
 
 		// send file to browser
-		header('Content-Type: text/csv; charset=UTF-8');
-		header('Content-Disposition: attachment;filename=' . $this->strFileName);
-
 		$objWriter = \PHPExcel_IOFactory::createWriter($this->objCsv, 'CSV')
 			->setDelimiter($this->strDelimiter)
 			->setEnclosure($this->strEnclosure)
 			->setSheetIndex(0);
-		$objWriter->save('php://output');
+		$objWriter->save(TL_ROOT . '/' . $strTmpFile);
+
+		$objFile = new \File($strTmpFile);
+		$objFile->sendToBrowser();
 	}
 
 

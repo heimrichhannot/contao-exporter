@@ -88,6 +88,7 @@ class Exporter
 		$arrOptions = array();
 		$arrSkipFields = array('index');
 		$strTableName = $dc->activeRecord->linkedTable;
+		$blnIsMediaExport = ($dc->activeRecord->fileType == EXPORTER_FILE_TYPE_MEDIA);
 
 		if ($strTableName)
 		{
@@ -105,19 +106,49 @@ class Exporter
 			}
 		}
 
-		$arrOptionsRawKeys= array_map(function($val) {
+		$arrOptionsRawKeys = array_map(function($val) {
 			return $val . EXPORTER_RAW_FIELD_SUFFIX;
 		}, array_keys($arrOptions));
 
-		$arrOptionsRawValues = array_map(function($val) {
-			return $val . $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'];
+		$arrOptionsRawValues = array_map(function($val) use ($blnIsMediaExport) {
+			return $val . ($blnIsMediaExport ? '' : $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted']);
 		}, array_values($arrOptions));
 
-		$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
+		if ($blnIsMediaExport)
+			$arrOptions = array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
+		else
+			$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
 
 		asort($arrOptions);
 
 		return $arrOptions;
+	}
+
+	protected function setHeaderFields($arrExportFields)
+	{
+		$arrFields = array();
+
+		\System::loadLanguageFile($this->strTable);
+
+		foreach ($arrExportFields as $strField)
+		{
+			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
+			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
+
+			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
+			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
+		}
+
+		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
+		{
+			foreach ($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'] as $callback)
+			{
+				$objCallback = \System::importStatic($callback[0]);
+				$arrFields = $objCallback->$callback[1]($arrFields, $this);
+			}
+		}
+
+		$this->arrHeaderFields = $arrFields;
 	}
 
 
@@ -147,20 +178,24 @@ class Exporter
 				{
 					switch($objExportConfig->fileType)
 					{
-						case 'csv' :
-							$objCsvExporter = new CsvExporter();
-							$objCsvExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-							$objCsvExporter->setExportFields($objExportConfig->tableFieldsForExport);
-							$objCsvExporter->export($this->strExportTable);
+						case EXPORTER_FILE_TYPE_CSV:
+							$objExporter = new CsvExporter();
+							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
+							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
+							$objExporter->export($this->strExportTable);
 							break;
-
-						case 'xls' :
-							$objXlsExporter = new XlsExporter();
-							$objXlsExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-							$objXlsExporter->setExportFields($objExportConfig->tableFieldsForExport);
-							$objXlsExporter->export($this->strExportTable);
+						case EXPORTER_FILE_TYPE_XLS:
+							$objExporter = new XlsExporter();
+							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
+							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
+							$objExporter->export($this->strExportTable);
 							break;
-
+						case EXPORTER_FILE_TYPE_MEDIA:
+							$objExporter = new MediaExporter();
+							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
+							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
+							$objExporter->export($this->strExportTable);
+							break;
 						default :
 							continue;
 					}
@@ -187,6 +222,7 @@ class Exporter
 		$arrOptions['delimiter'] = $objExportConfig->fieldDelimiter;
 		$arrOptions['enclosure'] = $objExportConfig->fieldEnclosure;
 		$arrOptions['exportTarget'] = 'download'; // for future
+		$arrOptions['compressionType'] = $objExportConfig->compressionType; // for future
 
 		return $arrOptions;
 	}
