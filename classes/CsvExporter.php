@@ -160,6 +160,9 @@ class CsvExporter extends Exporter
 				$objDc = new DC_Table($this->strTable);
 				$objDc->activeRecord = $objDbResult;
 				$varValue = $this->blnLocalizeFields ? Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc) : $varValue;
+				if (is_array($varValue))
+					$varValue = Helper::flattenArray($varValue);
+
 				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
 				$this->objCsv->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$this->objCsv->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);

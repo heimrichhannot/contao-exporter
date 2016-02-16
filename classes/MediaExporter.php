@@ -140,7 +140,7 @@ class MediaExporter
 
 				foreach ($varValue as $strPath)
 				{
-					if ($strPath && ($objFile = new \File($strPath)) !== null)
+					if ($strPath && ($objFile = new \File($strPath, true)) !== null && $objFile->exists())
 					{
 						if (isset($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename']))
 						{
