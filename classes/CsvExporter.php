@@ -163,7 +163,7 @@ class CsvExporter extends Exporter
 				if (is_array($varValue))
 					$varValue = Helper::flattenArray($varValue);
 
-				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
+				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objCsv->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$this->objCsv->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
 				$intCol++;

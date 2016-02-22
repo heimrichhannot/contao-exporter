@@ -162,7 +162,7 @@ class XlsExporter extends Exporter
 				if (is_array($varValue))
 					$varValue = Helper::flattenArray($varValue);
 
-				$this->objXls->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
+				$this->objXls->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objXls->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$intCol++;
 			}
