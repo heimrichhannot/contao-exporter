@@ -50,14 +50,14 @@ class Helper
 			$value = \Date::parse(\Config::get('datimFormat'), $value);
 		} elseif ($arrData['inputType'] == 'multifileupload') {
 			if (is_array($value)) {
-				$value = array_map(
+				$value = implode(', ', array_map(
 						function ($val) {
 							$strPath = Files::getPathFromUuid($val);
 
 							return $strPath ?: $val;
 						},
 						$value
-				);
+				));
 			} else {
 				$strPath = Files::getPathFromUuid($value);
 				$value   = $strPath ?: $value;
