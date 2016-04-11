@@ -158,6 +158,8 @@ class Exporter
 		$this->strGlobalOperationKey = \Input::get('key');
 		$this->strExportTable = \Input::get('table');
 
+		\Controller::loadDataContainer($this->strExportTable);
+
 		if (isset($this->strExportTable) && isset($this->strGlobalOperationKey))
 		{
 			$arrExportConfigs = ExporterModel::findByKeyAndTable($this->strGlobalOperationKey, $this->strExportTable);

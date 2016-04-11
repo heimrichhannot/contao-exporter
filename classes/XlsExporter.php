@@ -116,6 +116,8 @@ class XlsExporter extends Exporter
 	{
 		$strTmpFile = 'system/tmp/' . $this->strFileName;
 		$arrExportFields = array();
+		$arrDca = $GLOBALS['TL_DCA'][$this->strTable];
+		$arrDcaFields = $arrDca['fields'];
 
 		foreach ($this->arrExportFields as $strField)
 		{
@@ -125,15 +127,25 @@ class XlsExporter extends Exporter
 				$arrExportFields[] = $strField;
 		}
 
-		$objDbResult = \Database::getInstance()->prepare(
-			"SELECT " . implode(',', $arrExportFields) .
-			" FROM " . $this->strTable
-		)->execute();
+		$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
+					' FROM ' . $this->strTable;
+
+		if (TL_MODE == 'BE')
+		{
+			$strAct = \Input::get('act');
+			$intPid = \Input::get('id');
+
+			if ($intPid && !$strAct && $arrDcaFields && $arrDca['config']['ptable'])
+			{
+				$strQuery .= ' WHERE pid = ' . $intPid;
+			}
+		}
+
+		$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
 
 		if (!$objDbResult->numRows > 0)
 			return;
 
-		$arrDcaFields = $GLOBALS['TL_DCA'][$this->strTable]['fields'];
 		$intCol = 0;
 		$intRow = 1;
 
@@ -190,6 +202,29 @@ class XlsExporter extends Exporter
 	 */
 	protected function buildFileName()
 	{
-		return 'export-' . $this->strTable . '_' . date('Y-m-d_H-i', time()) . '.xls';
+		return 'export-' . $this->getArchiveName() . '_' . date('Y-m-d_H-i', time()) . '.xls';
+	}
+
+	public function getArchiveName()
+	{
+		$strPTable = $GLOBALS['TL_DCA'][$this->strTable]['config']['ptable'];
+		$intPid = \Input::get('id');
+
+		if($strPTable)
+		{
+			$strQuery = 'SELECT title FROM ' . $strPTable . ' WHERE id = ' . $intPid;
+
+			$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
+
+			while($objDbResult->next())
+			{
+				return $objDbResult->title;
+			}
+
+
+		}
+		else{
+			return $this->strTable;
+		}
 	}
 }
