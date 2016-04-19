@@ -14,9 +14,9 @@ Define your global operation in your entity's dca as follows:
 ```
 'global_operations' => array
 (
-    'export' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export',
-                $GLOBALS['TL_LANG']['tl_my_entity']['export'],
-                'system/modules/mymodule/assets/img/icon_export.png')
+    'export_csv' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export_csv',
+                 $GLOBALS['TL_LANG']['MSC']['export_csv'],
+                 'system/modules/exporter/assets/img/icon_export.png')
 ),
 ```
 
@@ -26,7 +26,7 @@ Add your backend module in your entity's config.php as follows:
 ```
 $GLOBALS['BE_MOD']['mygroup'] = array
 (
-    'export' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
+    'export_csv_' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
 ),
 ```
 

@@ -46,6 +46,8 @@ class CsvExporter extends Exporter
 
 		$this->blnAddHeader = $arrOptions['addHeader'];
 		$this->blnLocalizeHeader = $arrOptions['localizeHeader'];
+		$this->overrideHeaderFieldLabels = $arrOptions['overrideHeaderFieldLabels'];
+		$this->headerFieldLabels = $arrOptions['headerFieldLabels'];
 		$this->blnLocalizeFields = $arrOptions['localizeFields'];
 		$this->strDelimiter = $arrOptions['delimiter'];
 		$this->strEnclosure = $arrOptions['enclosure'];
@@ -94,7 +96,7 @@ class CsvExporter extends Exporter
 
 		if ($this->blnAddHeader)
 		{
-			$this->setHeaderFields($this->arrExportFields);
+			$this->setHeaderFields();
 		}
 
 		switch($this->strExportTarget)

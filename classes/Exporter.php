@@ -11,6 +11,8 @@
 
 namespace HeimrichHannot\Exporter;
 
+use HeimrichHannot\Haste\Util\Arrays;
+
 class Exporter
 {
 	protected $strGlobalOperationKey;
@@ -77,64 +79,37 @@ class Exporter
 	}
 
 
-	/**
-	 * Gets the fields from the selected database table
-	 *
-	 * @param \DataContainer $dc
-	 * @return array
-	 */
-	public static function getTableFields(\DataContainer $dc)
-	{
-		$arrOptions = array();
-		$arrSkipFields = array('index');
-		$strTableName = $dc->activeRecord->linkedTable;
-		$blnIsMediaExport = ($dc->activeRecord->fileType == EXPORTER_FILE_TYPE_MEDIA);
-
-		if ($strTableName)
-		{
-			$arrFields = \Database::getInstance()->listFields($strTableName);
-
-			if (!is_array($arrFields) || empty($arrFields))
-			{
-				return $arrOptions;
-			}
-
-			foreach ($arrFields as $arrField)
-			{
-				if (!in_array($arrField['type'], $arrSkipFields))
-					$arrOptions[$arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']';
-			}
-		}
-
-		$arrOptionsRawKeys = array_map(function($val) {
-			return $val . EXPORTER_RAW_FIELD_SUFFIX;
-		}, array_keys($arrOptions));
-
-		$arrOptionsRawValues = array_map(function($val) use ($blnIsMediaExport) {
-			return $val . ($blnIsMediaExport ? '' : $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted']);
-		}, array_values($arrOptions));
-
-		if (!$blnIsMediaExport)
-			$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
-
-		asort($arrOptions);
-
-		return $arrOptions;
-	}
-
-	protected function setHeaderFields($arrExportFields)
+	protected function setHeaderFields()
 	{
 		$arrFields = array();
 
 		\System::loadLanguageFile($this->strTable);
 
-		foreach ($arrExportFields as $strField)
+		if ($this->overrideHeaderFieldLabels)
+		{
+			$arrHeaderFieldLabels = deserialize($this->headerFieldLabels, true);
+			$arrOverriddenHeaderFields = Arrays::getAllValuesByKey('field', $arrHeaderFieldLabels);
+		}
+
+		foreach ($this->arrExportFields as $strField)
 		{
 			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
 			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
 
 			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
-			$arrFields[$strField] = strip_tags(($this->blnLocalizeHeader && $strFieldName) ? $strFieldName : $strField) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
+			$strLabel = $strField;
+
+			if ($this->overrideHeaderFieldLabels &&
+					($arrRow = Arrays::getRowInMcwArray('field', $strField, $arrOverriddenHeaderFields)) !== false)
+			{
+				$strLabel = $arrRow['label'];
+			}
+			elseif ($this->blnLocalizeHeader && $strFieldName)
+			{
+				$strLabel = $strFieldName;
+			}
+
+			$arrFields[$strField] = strip_tags($strLabel) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
 		}
 
 		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
@@ -218,6 +193,8 @@ class Exporter
 
 		$arrOptions['addHeader'] = $objExportConfig->addHeaderToExportTable;
 		$arrOptions['localizeHeader'] = $objExportConfig->localizeHeader;
+		$arrOptions['overrideHeaderFieldLabels'] = $objExportConfig->overrideHeaderFieldLabels;
+		$arrOptions['headerFieldLabels'] = $objExportConfig->headerFieldLabels;
 		$arrOptions['localizeFields'] = $objExportConfig->localizeFields;
 		$arrOptions['delimiter'] = $objExportConfig->fieldDelimiter;
 		$arrOptions['enclosure'] = $objExportConfig->fieldEnclosure;

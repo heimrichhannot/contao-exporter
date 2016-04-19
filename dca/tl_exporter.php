@@ -83,7 +83,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 	// Palettes
 	'palettes' => array
 	(
-		'__selector__' => array('fileType'),
+		'__selector__' => array('fileType', 'addHeaderToExportTable', 'overrideHeaderFieldLabels'),
 		'default' => '
 		{title_legend},title;
 		{export_legend},fileType;
@@ -93,9 +93,11 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 	// Subpalettes
 	'subpalettes' => array
 	(
-		'fileType_csv' => 'fieldDelimiter,fieldEnclosure,addHeaderToExportTable,localizeHeader,localizeFields',
-		'fileType_xls' => 'addHeaderToExportTable,localizeHeader,localizeFields',
-		'fileType_media' => 'compressionType'
+		'fileType_csv' => 'fieldDelimiter,fieldEnclosure,localizeFields,addHeaderToExportTable',
+		'fileType_xls' => 'localizeFields,addHeaderToExportTable',
+		'fileType_media' => 'compressionType',
+		'addHeaderToExportTable' => 'localizeHeader,overrideHeaderFieldLabels',
+		'overrideHeaderFieldLabels' => 'headerFieldLabels'
 	),
 
 	// Fields
@@ -160,7 +162,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 		(
 			'inputType' => 'checkboxWizard',
 			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['tableFieldsForExport'],
-			'options_callback' => array('HeimrichHannot\Exporter\Exporter', 'getTableFields'),
+			'options_callback' => array('tl_exporter', 'getTableFieldsAndUnformatted'),
 			'exclude' => true,
 			'eval' => array
 			(
@@ -228,8 +230,43 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'exclude' => true,
 			'inputType' => 'checkbox',
 			'eval' => array(
+				'submitOnChange' => true,
 				'tl_class' => 'w50 clr'),
 			'sql' => "char(1) NOT NULL default ''"
+		),
+		'overrideHeaderFieldLabels' => array
+		(
+			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['overrideHeaderFieldLabels'],
+			'exclude' => true,
+			'inputType' => 'checkbox',
+			'eval' => array(
+					'submitOnChange' => true,
+					'tl_class' => 'w50 clr'),
+			'sql' => "char(1) NOT NULL default ''"
+		),
+		'headerFieldLabels' => array(
+			'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels'],
+			'exclude'   => true,
+			'inputType' => 'multiColumnWizard',
+			'eval'      => array(
+				'tl_class'     => 'clr',
+				'columnFields' => array(
+					'field' => array(
+						'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['field'],
+						'exclude'   => true,
+						'options_callback' => array('tl_exporter', 'getTableFields'),
+						'inputType' => 'select',
+						'eval'      => array('style' => 'width: 250px'),
+					),
+					'label' => array(
+						'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['label'],
+						'exclude'   => true,
+						'inputType' => 'text',
+						'eval'      => array('style' => 'width: 250px'),
+					),
+				)
+			),
+			'sql'       => "blob NULL"
 		),
 		'compressionType' => array
 		(
@@ -260,22 +297,73 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'exclude' => true,
 			'inputType' => 'checkbox',
 			'eval' => array(
-				'tl_class' => 'w50'),
+				'tl_class' => 'w50 clr'),
 			'sql' => "char(1) NOT NULL default ''"
 		)
 	)
 );
 
-class tl_exporter extends Backend
+class tl_exporter extends \Backend
 {
 	/**
 	 * Check permissions to edit table tl_exporter
 	 */
 	public function checkPermission()
 	{
-		if ($this->User->isAdmin)
+		if (\BackendUser::getInstance()->isAdmin)
 		{
 			return;
 		}
+	}
+
+	public static function getTableFields($objDc)
+	{
+		return static::doGetTableFields($objDc->activeRecord->linkedTable);
+	}
+
+	public static function getTableFieldsAndUnformatted(\DataContainer $objDc)
+	{
+		return static::doGetTableFields($objDc->activeRecord->linkedTable,
+				$objDc->activeRecord->fileType != EXPORTER_FILE_TYPE_MEDIA);
+	}
+
+	public static function doGetTableFields($strTable, $blnIncludeUnformatted = false)
+	{
+		$arrOptions = array();
+		$arrSkipFields = array('index');
+		$strTableName = $strTable;
+
+		if ($strTableName)
+		{
+			$arrFields = \Database::getInstance()->listFields($strTableName);
+
+			if (!is_array($arrFields) || empty($arrFields))
+			{
+				return $arrOptions;
+			}
+
+			foreach ($arrFields as $arrField)
+			{
+				if (!in_array($arrField['type'], $arrSkipFields))
+					$arrOptions[$arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']';
+			}
+		}
+
+		if ($blnIncludeUnformatted)
+		{
+			$arrOptionsRawKeys = array_map(function($val) {
+				return $val . EXPORTER_RAW_FIELD_SUFFIX;
+			}, array_keys($arrOptions));
+
+			$arrOptionsRawValues = array_map(function($val) {
+				return $val . $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'];
+			}, array_values($arrOptions));
+
+			$arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
+		}
+
+		asort($arrOptions);
+
+		return $arrOptions;
 	}
 }

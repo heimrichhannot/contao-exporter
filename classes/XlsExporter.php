@@ -47,6 +47,8 @@ class XlsExporter extends Exporter
 		$this->blnAddHeader = $arrOptions['addHeader'];
 		$this->blnLocalizeHeader = $arrOptions['localizeHeader'];
 		$this->blnLocalizeFields = $arrOptions['localizeFields'];
+		$this->overrideHeaderFieldLabels = $arrOptions['overrideHeaderFieldLabels'];
+		$this->headerFieldLabels = $arrOptions['headerFieldLabels'];
 		$this->strDelimiter = $arrOptions['delimiter'];
 		$this->strEnclosure = $arrOptions['enclosure'];
 		$this->strExportTarget = $arrOptions['exportTarget'];
