@@ -85,12 +85,6 @@ class Exporter
 
 		\System::loadLanguageFile($this->strTable);
 
-		if ($this->overrideHeaderFieldLabels)
-		{
-			$arrHeaderFieldLabels = deserialize($this->headerFieldLabels, true);
-			$arrOverriddenHeaderFields = Arrays::getAllValuesByKey('field', $arrHeaderFieldLabels);
-		}
-
 		foreach ($this->arrExportFields as $strField)
 		{
 			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
@@ -99,8 +93,8 @@ class Exporter
 			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
 			$strLabel = $strField;
 
-			if ($this->overrideHeaderFieldLabels &&
-					($arrRow = Arrays::getRowInMcwArray('field', $strField, $arrOverriddenHeaderFields)) !== false)
+			if ($this->overrideHeaderFieldLabels && ($arrRow =
+					Arrays::getRowInMcwArray('field', $strField, deserialize($this->headerFieldLabels, true))) !== false)
 			{
 				$strLabel = $arrRow['label'];
 			}
