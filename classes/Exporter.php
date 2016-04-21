@@ -103,7 +103,7 @@ class Exporter
 				$strLabel = $strFieldName;
 			}
 
-			$arrFields[$strField] = strip_tags($strLabel) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
+			$arrFields[$strField] = strip_tags(html_entity_decode($strLabel)) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
 		}
 
 		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
