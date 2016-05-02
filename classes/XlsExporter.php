@@ -170,17 +170,19 @@ class XlsExporter extends Exporter
 
 			foreach ($arrRow as $key => $varValue)
 			{
+
 				$objDc = new DC_Table($this->strTable);
 				$objDc->activeRecord = $objDbResult;
 				$varValue = $this->blnLocalizeFields ? Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc) : $varValue;
 				if (is_array($varValue))
 					$varValue = Helper::flattenArray($varValue);
 
+				if($key == 'tstamp')$varValue= date(\Config::get('dateFormat'), $varValue);
+
 				$this->objXls->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objXls->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$intCol++;
 			}
-
 			$this->objXls->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
 			$intRow++;
 		}
