@@ -12,6 +12,7 @@
 namespace HeimrichHannot\Exporter;
 
 use Contao\DC_Table;
+use HeimrichHannot\Haste\Dca\General;
 use HeimrichHannot\Haste\Util\Files;
 
 class CsvExporter extends Exporter
@@ -164,7 +165,6 @@ class CsvExporter extends Exporter
 				$varValue = $this->blnLocalizeFields ? Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc) : $varValue;
 				if (is_array($varValue))
 					$varValue = Helper::flattenArray($varValue);
-				if($key == 'tstamp')$varValue= date(\Config::get('dateFormat'), $varValue);
 				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objCsv->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$this->objCsv->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
@@ -197,29 +197,6 @@ class CsvExporter extends Exporter
 	 */
 	protected function buildFileName()
 	{
-		return 'export-' . $this->getArchiveName() . '_' . date('Y-m-d_H-i', time()) . '.csv';
-	}
-
-	public function getArchiveName()
-	{
-		$strPTable = $GLOBALS['TL_DCA'][$this->strTable]['config']['ptable'];
-		$intPid = \Input::get('id');
-
-		if($strPTable)
-		{
-			$strQuery = 'SELECT title FROM ' . $strPTable . ' WHERE id = ' . $intPid;
-
-			$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
-
-			while($objDbResult->next())
-			{
-				return $objDbResult->title;
-			}
-
-
-		}
-		else{
-			return $this->strTable;
-		}
+		return 'export-' . Helper::getArchiveName($this->strTable) . '_' . date('Y-m-d_H-i', time()) . '.csv';
 	}
 }

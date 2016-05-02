@@ -11,7 +11,9 @@
 
 namespace HeimrichHannot\Exporter;
 
+use Contao\DC_Table;
 use HeimrichHannot\Haste\Util\Files;
+use HeimrichHannot\Haste\Dca\General;
 
 class Helper
 {
@@ -112,5 +114,20 @@ class Helper
 		$return = array();
 		array_walk_recursive($array, function($a) use (&$return) { $return[] = $a; });
 		return $return;
+	}
+
+	public static function getArchiveName($strTable)
+	{
+		$strPTable = $GLOBALS['TL_DCA'][$strTable]['config']['ptable'];
+		$intPid = \Input::get('id');
+
+		if($strPTable)
+		{
+			$objInstance = General::getModelInstance($strPTable, $intPid);
+			return $objInstance->title;
+		}
+		else{
+			return $strTable;
+		}
 	}
 }

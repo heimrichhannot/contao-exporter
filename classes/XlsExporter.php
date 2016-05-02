@@ -177,8 +177,6 @@ class XlsExporter extends Exporter
 				if (is_array($varValue))
 					$varValue = Helper::flattenArray($varValue);
 
-				if($key == 'tstamp')$varValue= date(\Config::get('dateFormat'), $varValue);
-
 				$this->objXls->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objXls->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 				$intCol++;
@@ -206,29 +204,7 @@ class XlsExporter extends Exporter
 	 */
 	protected function buildFileName()
 	{
-		return 'export-' . $this->getArchiveName() . '_' . date('Y-m-d_H-i', time()) . '.xls';
+		return 'export-' . Helper::getArchiveName($this->strTable) . '_' . date('Y-m-d_H-i', time()) . '.xls';
 	}
 
-	public function getArchiveName()
-	{
-		$strPTable = $GLOBALS['TL_DCA'][$this->strTable]['config']['ptable'];
-		$intPid = \Input::get('id');
-
-		if($strPTable)
-		{
-			$strQuery = 'SELECT title FROM ' . $strPTable . ' WHERE id = ' . $intPid;
-
-			$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
-
-			while($objDbResult->next())
-			{
-				return $objDbResult->title;
-			}
-
-
-		}
-		else{
-			return $this->strTable;
-		}
-	}
 }
