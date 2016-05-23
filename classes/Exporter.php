@@ -53,11 +53,8 @@ abstract class Exporter extends \Controller
 
 		switch ($this->target)
 		{
-			case EXPORTER_TARGET_DOWNLOAD:
-				$this->exportToDownload();
-				break;
-
 			default:
+				$this->exportToDownload();
 				break;
 		}
 	}
