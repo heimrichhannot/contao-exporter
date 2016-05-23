@@ -17,186 +17,40 @@ use HeimrichHannot\Haste\Util\Files;
 
 class CsvExporter extends Exporter
 {
-	protected $blnAddHeader;
-	protected $blnLocalizeHeader;
-	protected $blnLocalizeFields;
-	protected $strDelimiter;
-	protected $strEnclosure;
-	protected $strExportTarget;
-
-	protected $strTable;
-	protected $strFileName;
-	protected $objCsv;
+	protected $strFileType = EXPORTER_FILE_TYPE_CSV;
+	protected $strWriterOutputType = 'CSV';
 
 	protected $arrHeaderFields = array();
 	protected $arrExportFields = array();
 
-	public function __construct() {
-		$this->objCsv = new \PHPExcel();
+	public function __construct($objConfig) {
+		parent::__construct($objConfig);
+
+		$this->objPhpExcel = new \PHPExcel();
 	}
 
-
-	/**
-	 * Sets the options for the exporter
-	 *
-	 * @param array $arrOptions
-	 */
-	public function setOptions(array $arrOptions=array())
+	public function export()
 	{
-		if (empty($arrOptions)) return;
-
-		$this->blnAddHeader = $arrOptions['addHeader'];
-		$this->blnLocalizeHeader = $arrOptions['localizeHeader'];
-		$this->overrideHeaderFieldLabels = $arrOptions['overrideHeaderFieldLabels'];
-		$this->headerFieldLabels = $arrOptions['headerFieldLabels'];
-		$this->blnLocalizeFields = $arrOptions['localizeFields'];
-		$this->strDelimiter = $arrOptions['delimiter'];
-		$this->strEnclosure = $arrOptions['enclosure'];
-		$this->strExportTarget = $arrOptions['exportTarget'];
-	}
-
-
-	/**
-	 * Sets the fields
-	 *
-	 * @param $varFields
-	 */
-	public function setExportFields($varFields)
-	{
-		if (is_array($varFields))
-			$this->arrExportFields = $varFields;
-		else
-			$this->arrExportFields = deserialize($varFields, true);
-	}
-
-
-	/**
-	 * Sets the file name
-	 *
-	 * @param $strFileName
-	 */
-	public function setFileName($strFileName)
-	{
-		$this->strFileName = $strFileName;
-	}
-
-
-	/**
-	 * Prepares the export
-	 *
-	 * @param $strTable
-	 */
-	public function export($strTable)
-	{
-		$this->strTable = $strTable;
-
-		if (!$this->strFileName)
-		{
-			$this->strFileName = $this->buildFileName();
-		}
-
-		if ($this->blnAddHeader)
+		if ($this->objConfig->addHeaderToExportTable)
 		{
 			$this->setHeaderFields();
 		}
 
-		switch($this->strExportTarget)
-		{
-			case 'download' :
-				$this->exportToDownload();
-				break;
-
-			default:
-				break;
-		}
+		parent::export();
 	}
 
-
-	/**
-	 * Gets data from the database and writes it to the csv file for download
-	 */
-	protected function exportToDownload()
+	public function processHeaderRow($intCol)
 	{
-		$strTmpFile = 'system/tmp/' . $this->strFileName;
-
-		$arrExportFields = array();
-		foreach ($this->arrExportFields as $strField)
-		{
-			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
-				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
-			else
-				$arrExportFields[] = $strField;
-		}
-
-		$objDbResult = \Database::getInstance()->prepare(
-				"SELECT " . implode(',', $arrExportFields) .
-				" FROM " . $this->strTable
-		)->execute();
-
-		if (!$objDbResult->numRows > 0)
-			return;
-
-		$arrDcaFields = $GLOBALS['TL_DCA'][$this->strTable]['fields'];
-		$intCol = 0;
-		$intRow = 1;
-
-		// write header fields
-		if ($this->blnAddHeader)
-		{
-			foreach ($this->arrHeaderFields as $varValue)
-			{
-				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
-				$this->objCsv->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
-				$intCol++;
-			}
-			$intRow++;
-		}
-
-		// write to file
-		while($objDbResult->next())
-		{
-			$arrRow = $objDbResult->row();
-			$intCol = 0;
-
-			foreach ($arrRow as $key => $varValue)
-			{
-				$objDc = new DC_Table($this->strTable);
-				$objDc->activeRecord = $objDbResult;
-				$varValue = $this->blnLocalizeFields ? Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc) : $varValue;
-				if (is_array($varValue))
-					$varValue = Helper::flattenArray($varValue);
-				$this->objCsv->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
-				$this->objCsv->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
-				$this->objCsv->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
-				$intCol++;
-			}
-
-			$this->objCsv->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
-			$intRow++;
-		}
-
-		$this->objCsv->setActiveSheetIndex(0);
-		$this->objCsv->getActiveSheet()->setTitle('Export');
-
-		// send file to browser
-		$objWriter = \PHPExcel_IOFactory::createWriter($this->objCsv, 'CSV')
-			->setDelimiter($this->strDelimiter)
-			->setEnclosure($this->strEnclosure)
-			->setSheetIndex(0);
-		$objWriter->save(TL_ROOT . '/' . $strTmpFile);
-
-		$objFile = new \File($strTmpFile);
-		$objFile->sendToBrowser();
+		$this->objPhpExcel->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
 	}
 
-
-	/**
-	 * Builds the name for the export file
-	 *
-	 * @return string
-	 */
-	protected function buildFileName()
+	public function processBodyRow($intCol)
 	{
-		return 'export-' . Helper::getArchiveName($this->strTable) . '_' . date('Y-m-d_H-i', time()) . '.csv';
+		$this->objPhpExcel->getActiveSheet()->getStyle(\PHPExcel_Cell::stringFromColumnIndex($intCol))->getAlignment()->setWrapText(true);
+	}
+
+	public function updateWriter($objWriter)
+	{
+		$objWriter->setDelimiter($this->delimiter ?: ',')->setEnclosure($this->enclosure ?: '"')->setSheetIndex(0);
 	}
 }

@@ -8,6 +8,7 @@ define('EXPORTER_FILE_TYPE_CSV', 'csv');
 define('EXPORTER_FILE_TYPE_XLS', 'xls');
 define('EXPORTER_FILE_TYPE_MEDIA', 'media');
 define('EXPORTER_COMPESSION_TYPE_ZIP', 'zip');
+define('EXPORTER_TARGET_DOWNLOAD', 'download');
 
 /**
  * Back end modules

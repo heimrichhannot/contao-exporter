@@ -23,13 +23,16 @@ ClassLoader::addNamespaces(array
  */
 ClassLoader::addClasses(array
 (
+	// Modules
+	'HeimrichHannot\Exporter\ModuleExporter' => 'system/modules/exporter/modules/ModuleExporter.php',
+
 	// Classes
-	'HeimrichHannot\Exporter\XlsExporter'   => 'system/modules/exporter/classes/XlsExporter.php',
-	'HeimrichHannot\Exporter\CsvExporter'   => 'system/modules/exporter/classes/CsvExporter.php',
-	'HeimrichHannot\Exporter\Exporter'      => 'system/modules/exporter/classes/Exporter.php',
-	'HeimrichHannot\Exporter\Helper'        => 'system/modules/exporter/classes/Helper.php',
-	'HeimrichHannot\Exporter\MediaExporter' => 'system/modules/exporter/classes/MediaExporter.php',
+	'HeimrichHannot\Exporter\XlsExporter'    => 'system/modules/exporter/classes/XlsExporter.php',
+	'HeimrichHannot\Exporter\CsvExporter'    => 'system/modules/exporter/classes/CsvExporter.php',
+	'HeimrichHannot\Exporter\Exporter'       => 'system/modules/exporter/classes/Exporter.php',
+	'HeimrichHannot\Exporter\Helper'         => 'system/modules/exporter/classes/Helper.php',
+	'HeimrichHannot\Exporter\MediaExporter'  => 'system/modules/exporter/classes/MediaExporter.php',
 
 	// Models
-	'HeimrichHannot\Exporter\ExporterModel' => 'system/modules/exporter/models/ExporterModel.php',
+	'HeimrichHannot\Exporter\ExporterModel'  => 'system/modules/exporter/models/ExporterModel.php',
 ));

@@ -17,89 +17,14 @@ use HeimrichHannot\Haste\Util\Files;
 
 class MediaExporter
 {
-	protected $strExportTarget;
-	protected $strCompressionType;
-
-	protected $strTable;
-	protected $strFileName;
-
-	protected $arrExportFields = array();
-
-	/**
-	 * Sets the options for the exporter
-	 *
-	 * @param array $arrOptions
-	 */
-	public function setOptions(array $arrOptions=array())
-	{
-		if (empty($arrOptions)) return;
-
-		$this->strExportTarget = $arrOptions['exportTarget'];
-		$this->strCompressionType = $arrOptions['compressionType'];
-	}
-
-
-	/**
-	 * Sets the fields
-	 *
-	 * @param $varFields
-	 */
-	public function setExportFields($varFields)
-	{
-		if (is_array($varFields))
-			$this->arrExportFields = $varFields;
-		else
-			$this->arrExportFields = deserialize($varFields, true);
-	}
-
-
-	/**
-	 * Sets the file name
-	 *
-	 * @param $strFileName
-	 */
-	public function setFileName($strFileName)
-	{
-		$this->strFileName = $strFileName;
-	}
-
-
-	/**
-	 * Prepares the export
-	 *
-	 * @param $strTable
-	 */
-	public function export($strTable)
-	{
-		$this->strTable = $strTable;
-
-		if (!$this->strFileName)
-		{
-			$this->strFileName = $this->buildFileName();
-		}
-
-		switch($this->strExportTarget)
-		{
-			case 'download' :
-				$this->exportToDownload();
-				break;
-
-			default:
-				break;
-		}
-	}
-
-
-	/**
-	 * Gets data from the database and writes it as file to the zip file for download
-	 */
 	protected function exportToDownload()
 	{
-		$strTmpFile = 'system/tmp/' . $this->strFileName;
-		$strTmpFolder = str_replace('.' . $this->strCompressionType, '', $strTmpFile);
-
+		$strTmpFile = 'system/tmp/' . $this->strFilename;
+		$strTmpFolder = str_replace('.' . $this->compressionType, '', $strTmpFile);
 		$arrExportFields = array();
-		foreach ($this->arrExportFields as $strField)
+		$arrDca = $GLOBALS['TL_DCA'][$this->linkedTable]['fields'];
+
+		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
 		{
 			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
 				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
@@ -109,20 +34,18 @@ class MediaExporter
 
 		$objDbResult = \Database::getInstance()->prepare(
 				"SELECT " . implode(',', $arrExportFields) .
-				" FROM " . $this->strTable
+				" FROM " . $this->linkedTable
 		)->execute();
 
 		if (!$objDbResult->numRows > 0)
 			return;
 
-		switch ($this->strCompressionType)
+		switch ($this->compressionType)
 		{
 			default:
 				$objZip = new ZipWriter($strTmpFile);
 				break;
 		}
-
-		$arrDcaFields = $GLOBALS['TL_DCA'][$this->strTable]['fields'];
 
 		// write files
 		while ($objDbResult->next())
@@ -131,9 +54,9 @@ class MediaExporter
 
 			foreach ($arrRow as $key => $varValue)
 			{
-				$objDc = new DC_Table($this->strTable);
+				$objDc = new DC_Table($this->linkedTable);
 				$objDc->activeRecord = $objDbResult;
-				$varValue = Helper::getFormatedValueByDca($varValue, $arrDcaFields[$key], $objDc);
+				$varValue = Helper::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc);
 
 				if (!is_array($varValue))
 					$varValue = array($varValue);
@@ -158,7 +81,7 @@ class MediaExporter
 							}
 						}
 
-						switch ($this->strCompressionType)
+						switch ($this->compressionType)
 						{
 							default:
 								$objZip->addFile($objFile->path);
@@ -169,7 +92,7 @@ class MediaExporter
 			}
 		}
 
-		switch ($this->strCompressionType)
+		switch ($this->compressionType)
 		{
 			default:
 				$objZip->close();
@@ -184,14 +107,8 @@ class MediaExporter
 		$objFile->sendToBrowser();
 	}
 
-
-	/**
-	 * Builds the name for the export file
-	 *
-	 * @return string
-	 */
 	protected function buildFileName()
 	{
-		return 'export-' . $this->strTable . '_' . date('Y-m-d_H-i', time()) . '.' . $this->strCompressionType;
+		return 'export-' . $this->linkedTable . '_' . date('Y-m-d_H-i', time()) . '.' . $this->compressionType;
 	}
 }

@@ -14,7 +14,7 @@ Define your global operation in your entity's dca as follows:
 ```
 'global_operations' => array
 (
-    'export_csv' => \HeimrichHannot\Exporter\Exporter::getGlobalOperation('export_csv',
+    'export_csv' => \HeimrichHannot\Exporter\ModuleExporter::getGlobalOperation('export_csv',
                  $GLOBALS['TL_LANG']['MSC']['export_csv'],
                  'system/modules/exporter/assets/img/icon_export.png')
 ),
@@ -26,7 +26,7 @@ Add your backend module in your entity's config.php as follows:
 ```
 $GLOBALS['BE_MOD']['mygroup'] = array
 (
-    'export_csv_' => \HeimrichHannot\Exporter\Exporter::getBackendModule()
+    'export_csv' => \HeimrichHannot\Exporter\ModuleExporter::getBackendModule()
 ),
 ```
 
@@ -51,6 +51,7 @@ Name | Description
 ---- | -----------
 title | The export configuration's title
 fileType | The type of exporter
+target | The target of the exporter
 fieldDelimiter | Determines the delimiter character (e.g. ,)
 fieldEnclosure | Determines the enclosure character (e.g. ")
 addHeaderToExportTable | Determines whether a header row is added to the export

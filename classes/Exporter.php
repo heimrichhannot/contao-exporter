@@ -12,85 +12,76 @@
 namespace HeimrichHannot\Exporter;
 
 use HeimrichHannot\Haste\Util\Arrays;
+use HeimrichHannot\Haste\Util\Files;
 
-class Exporter
+abstract class Exporter extends \Controller
 {
-	protected $strGlobalOperationKey;
-	protected $strExportTable;
-
+	protected $objConfig;
+	
 	/**
-	 * Searches through all backend modules to find global operation keys and returns a filtered list
-	 *
-	 * @return array
+	 * @var \PHPExcel
 	 */
-	public static function getGlobalOperationKeysAsOptions()
+	protected $objPhpExcel;
+	protected $strWriterOutputType;
+	
+	protected $strFilename;
+	protected $strFileType;
+
+	public function __construct($objConfig)
 	{
-		$arrGlobalOperations = array();
-		$arrSkipKeys = array('callback', 'generate', 'icon', 'import', 'javascript', 'stylesheet', 'table', 'tables');
+		$this->objConfig = $objConfig;
+		$arrSkipFields = array('id', 'tstamp', 'title');
 
-		foreach ($GLOBALS['BE_MOD'] as $arrSection)
+		foreach ($objConfig->row() as $strField => $varValue)
 		{
-			foreach ($arrSection as $arrModule)
-			{
-				foreach ($arrModule as $strKey => $varValue)
-				{
-					if (!in_array($strKey, $arrGlobalOperations) && !in_array($strKey, $arrSkipKeys))
-					{
-						$arrGlobalOperations[] = $strKey;
-					}
-				}
-			}
-		}
-		sort($arrGlobalOperations);
+			if (in_array($strField, $arrSkipFields))
+				continue;
 
-		return $arrGlobalOperations;
-	}
-
-
-	/**
-	 * Searches through all backend modules to find the linked tables for the selected global operation key
-	 *
-	 * @param \DataContainer $dc
-	 * @return array
-	 */
-	public static function getLinkedTablesAsOptions(\DataContainer $dc)
-	{
-		$arrTables = array();
-		$strGlobalOperationKey = $dc->activeRecord->globalOperationKey;
-
-		if ($strGlobalOperationKey)
-		{
-			foreach ($GLOBALS['BE_MOD'] as $arrSection)
-			{
-				foreach ($arrSection as $strModule => $arrModule)
-				{
-					foreach ($arrModule as $strKey => $varValue)
-					{
-						if ($strKey === $strGlobalOperationKey)
-						{
-							$arrTables[$strModule] = $arrModule['tables'];
-						}
-					}
-				}
-			}
+			$this->{$strField} = $varValue;
 		}
 
-		return $arrTables;
+		\Controller::loadDataContainer($this->linkedTable);
+		\System::loadLanguageFile($this->linkedTable);
 	}
 
+	public function export()
+	{
+		if (!$this->strFilename)
+		{
+			$this->strFilename = $this->buildFilename();
+		}
+
+		switch ($this->target)
+		{
+			case EXPORTER_TARGET_DOWNLOAD:
+				$this->exportToDownload();
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	public function setFilename($strFilename)
+	{
+		$this->strFilename = $strFilename;
+	}
+
+	protected function buildFilename()
+	{
+		return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . date('Y-m-d_H-i', time()) . '.' . $this->strFileType;
+	}
 
 	protected function setHeaderFields()
 	{
 		$arrFields = array();
 
-		\System::loadLanguageFile($this->strTable);
-
-		foreach ($this->arrExportFields as $strField)
+		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
 		{
 			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
 			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
 
-			$strFieldName = $GLOBALS['TL_DCA'][$this->strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
+			$strFieldName = $GLOBALS['TL_DCA'][$this->linkedTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
 			$strLabel = $strField;
 
 			if ($this->overrideHeaderFieldLabels && ($arrRow =
@@ -98,7 +89,7 @@ class Exporter
 			{
 				$strLabel = $arrRow['label'];
 			}
-			elseif ($this->blnLocalizeHeader && $strFieldName)
+			elseif ($this->localizeHeader && $strFieldName)
 			{
 				$strLabel = $strFieldName;
 			}
@@ -118,103 +109,103 @@ class Exporter
 		$this->arrHeaderFields = $arrFields;
 	}
 
-
-	/**
-	 * Gets the export configs for selected key and table and calls the needed exporter
-	 */
-	public function export()
+	protected function exportToDownload()
 	{
-		$this->strGlobalOperationKey = \Input::get('key');
-		$this->strExportTable = \Input::get('table');
+		if (!$this->objPhpExcel)
+			die('Define objPhpExcel in your Exporter class or overwrite exportToDownload.');
 
-		\Controller::loadDataContainer($this->strExportTable);
+		$strTmpFile = 'system/tmp/' . $this->strFilename;
+		$arrExportFields = array();
+		$arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
 
-		if (isset($this->strExportTable) && isset($this->strGlobalOperationKey))
+		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
 		{
-			$arrExportConfigs = ExporterModel::findByKeyAndTable($this->strGlobalOperationKey, $this->strExportTable);
-
-			if (!$arrExportConfigs)
-			{
-				if (empty($_SESSION['TL_ERROR']))
-				{
-					\Message::addError($GLOBALS['TL_LANG']['MSC']['exporter']['noConfigFound']);
-					\Controller::redirect($_SERVER['HTTP_REFERER']);
-				}
-			}
+			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
+				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
 			else
+				$arrExportFields[] = $strField;
+		}
+
+		$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
+			' FROM ' . $this->linkedTable;
+
+		if (TL_MODE == 'BE')
+		{
+			$strAct = \Input::get('act');
+			$intPid = \Input::get('id');
+
+			if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
 			{
-				foreach ($arrExportConfigs as $objExportConfig)
-				{
-					switch($objExportConfig->fileType)
-					{
-						case EXPORTER_FILE_TYPE_CSV:
-							$objExporter = new CsvExporter();
-							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
-							$objExporter->export($this->strExportTable);
-							break;
-						case EXPORTER_FILE_TYPE_XLS:
-							$objExporter = new XlsExporter();
-							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
-							$objExporter->export($this->strExportTable);
-							break;
-						case EXPORTER_FILE_TYPE_MEDIA:
-							$objExporter = new MediaExporter();
-							$objExporter->setOptions($this->setOptionsForExporter($objExportConfig));
-							$objExporter->setExportFields($objExportConfig->tableFieldsForExport);
-							$objExporter->export($this->strExportTable);
-							break;
-						default :
-							continue;
-					}
-				}
-				die();
+				$strQuery .= ' WHERE pid = ' . $intPid;
 			}
 		}
+
+		$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
+
+		if (!$objDbResult->numRows > 0)
+			return;
+
+		$intCol = 0;
+		$intRow = 1;
+
+		// header
+		if ($this->objConfig->addHeaderToExportTable)
+		{
+			foreach ($this->arrHeaderFields as $varValue)
+			{
+				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
+
+				$this->processHeaderRow($intCol);
+
+				$intCol++;
+			}
+			$intRow++;
+		}
+
+		// body
+		while($objDbResult->next())
+		{
+			$arrRow = $objDbResult->row();
+			$intCol = 0;
+
+			foreach ($arrRow as $key => $varValue)
+			{
+
+				$objDc = new \DC_Table($this->linkedTable);
+				$objDc->activeRecord = $objDbResult;
+				$varValue = $this->localizeFields ? Helper::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc) : $varValue;
+				if (is_array($varValue))
+					$varValue = Helper::flattenArray($varValue);
+
+				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
+				$this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
+
+				$this->processBodyRow($intCol);
+
+				$intCol++;
+			}
+			$this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
+			$intRow++;
+		}
+
+		$this->objPhpExcel->setActiveSheetIndex(0);
+		$this->objPhpExcel->getActiveSheet()->setTitle('Export');
+
+		// send file to browser
+		$objWriter = \PHPExcel_IOFactory::createWriter($this->objPhpExcel, $this->strWriterOutputType);
+
+		$this->updateWriter($objWriter);
+
+		$objWriter->save(TL_ROOT . '/' . $strTmpFile);
+
+		$objFile = new \File($strTmpFile);
+		$objFile->sendToBrowser();
 	}
 
+	public function processHeaderRow($intCol) {}
 
-	/**
-	 * Creates an array that contains the needed options for the different exporters from the exporter config object.
-	 *
-	 * @param $objExportConfig
-	 * @return array
-	 */
-	protected function setOptionsForExporter($objExportConfig)
-	{
-		$arrOptions = array();
+	public function processBodyRow($intCol) {}
 
-		$arrOptions['addHeader'] = $objExportConfig->addHeaderToExportTable;
-		$arrOptions['localizeHeader'] = $objExportConfig->localizeHeader;
-		$arrOptions['overrideHeaderFieldLabels'] = $objExportConfig->overrideHeaderFieldLabels;
-		$arrOptions['headerFieldLabels'] = $objExportConfig->headerFieldLabels;
-		$arrOptions['localizeFields'] = $objExportConfig->localizeFields;
-		$arrOptions['delimiter'] = $objExportConfig->fieldDelimiter;
-		$arrOptions['enclosure'] = $objExportConfig->fieldEnclosure;
-		$arrOptions['exportTarget'] = 'download'; // for future
-		$arrOptions['compressionType'] = $objExportConfig->compressionType; // for future
-
-		return $arrOptions;
-	}
-
-	public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
-	{
-		$arrOperation = array
-		(
-			'label'      => &$strLabel,
-			'href'       => 'key=' . $strName,
-			'class'      => 'header_' . $strName . '_entities',
-			'icon'       => $strIcon,
-			'attributes' => 'onclick="Backend.getScrollOffset()"'
-		);
-
-		return $arrOperation;
-	}
-
-	public static function getBackendModule()
-	{
-		return array('\HeimrichHannot\Exporter\Exporter', 'export');
-	}
+	public function updateWriter($objWriter) {}
 
 }

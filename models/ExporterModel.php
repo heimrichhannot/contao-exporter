@@ -23,7 +23,7 @@ class ExporterModel extends \Model
 		$arrColumns[] = "($t.globalOperationKey='" . $strKey . "')";
 		$arrColumns[] = "($t.linkedTable='" . $strTable . "')";
 
-		return static::findBy($arrColumns, null, $arrOptions);
+		return static::findOneBy($arrColumns, null, $arrOptions);
 	}
 
 }

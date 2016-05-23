@@ -86,7 +86,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 		'__selector__' => array('fileType', 'addHeaderToExportTable', 'overrideHeaderFieldLabels'),
 		'default' => '
 		{title_legend},title;
-		{export_legend},fileType;
+		{export_legend},target,fileType;
 		{table_legend},globalOperationKey,linkedTable,tableFieldsForExport;',
 	),
 
@@ -133,7 +133,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['globalOperationKey'],
 			'exclude'          => true,
 			'inputType'        => 'select',
-			'options_callback' => array('HeimrichHannot\Exporter\Exporter', 'getGlobalOperationKeysAsOptions'),
+			'options_callback' => array('tl_exporter', 'getGlobalOperationKeysAsOptions'),
 			'eval'             => array
 			(
 				'mandatory'          => true,
@@ -148,7 +148,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'label'  => &$GLOBALS['TL_LANG']['tl_exporter']['linkedTable'],
 			'exclude' => true,
 			'inputType' => 'select',
-			'options_callback' => array('HeimrichHannot\Exporter\Exporter', 'getLinkedTablesAsOptions'),
+			'options_callback' => array('tl_exporter', 'getLinkedTablesAsOptions'),
 			'eval' => array
 			(
 				'mandatory' => true,
@@ -299,7 +299,22 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'eval' => array(
 				'tl_class' => 'w50 clr'),
 			'sql' => "char(1) NOT NULL default ''"
-		)
+		),
+		'target' => array
+		(
+			'label'  => &$GLOBALS['TL_LANG']['tl_exporter']['target'],
+			'exclude' => true,
+			'inputType' => 'select',
+			'options' => array('download'),
+			'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['target'],
+			'eval' => array
+			(
+				'mandatory' => true,
+				'includeBlankOption' => true,
+				'tl_class' => 'w50',
+			),
+			'sql' => "varchar(255) NOT NULL default ''"
+		),
 	)
 );
 
@@ -365,5 +380,65 @@ class tl_exporter extends \Backend
 		asort($arrOptions);
 
 		return $arrOptions;
+	}
+
+	/**
+	 * Searches through all backend modules to find global operation keys and returns a filtered list
+	 *
+	 * @return array
+	 */
+	public static function getGlobalOperationKeysAsOptions()
+	{
+		$arrGlobalOperations = array();
+		$arrSkipKeys = array('callback', 'generate', 'icon', 'import', 'javascript', 'stylesheet', 'table', 'tables');
+
+		foreach ($GLOBALS['BE_MOD'] as $arrSection)
+		{
+			foreach ($arrSection as $arrModule)
+			{
+				foreach ($arrModule as $strKey => $varValue)
+				{
+					if (!in_array($strKey, $arrGlobalOperations) && !in_array($strKey, $arrSkipKeys))
+					{
+						$arrGlobalOperations[] = $strKey;
+					}
+				}
+			}
+		}
+		sort($arrGlobalOperations);
+
+		return $arrGlobalOperations;
+	}
+
+
+	/**
+	 * Searches through all backend modules to find the linked tables for the selected global operation key
+	 *
+	 * @param \DataContainer $dc
+	 * @return array
+	 */
+	public static function getLinkedTablesAsOptions(\DataContainer $dc)
+	{
+		$arrTables = array();
+		$strGlobalOperationKey = $dc->activeRecord->globalOperationKey;
+
+		if ($strGlobalOperationKey)
+		{
+			foreach ($GLOBALS['BE_MOD'] as $arrSection)
+			{
+				foreach ($arrSection as $strModule => $arrModule)
+				{
+					foreach ($arrModule as $strKey => $varValue)
+					{
+						if ($strKey === $strGlobalOperationKey)
+						{
+							$arrTables[$strModule] = $arrModule['tables'];
+						}
+					}
+				}
+			}
+		}
+
+		return $arrTables;
 	}
 }
