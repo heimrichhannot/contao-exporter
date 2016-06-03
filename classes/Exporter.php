@@ -13,6 +13,7 @@ namespace HeimrichHannot\Exporter;
 
 use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
+use HeimrichHannot\Haste\Util\FormSubmission;
 
 abstract class Exporter extends \Controller
 {
@@ -170,9 +171,10 @@ abstract class Exporter extends \Controller
 
 				$objDc = new \DC_Table($this->linkedTable);
 				$objDc->activeRecord = $objDbResult;
-				$varValue = $this->localizeFields ? Helper::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc) : $varValue;
+				$varValue = $this->localizeFields ?
+					FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc) : $varValue;
 				if (is_array($varValue))
-					$varValue = Helper::flattenArray($varValue);
+					$varValue = Arrays::flattenArray($varValue);
 
 				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
 				$this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
