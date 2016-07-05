@@ -12,6 +12,13 @@ $arrLang['globalOperationKey'] = array('Globale Operation', 'Wählen Sie hier di
 $arrLang['linkedTable'] = array('Verknüpfte Tabelle', 'Wählen Sie hier die Tabelle aus, die exportiert werden soll.');
 $arrLang['tableFieldsForExport'] = array('Felder', 'Wählen Sie hier die Felder aus, die exportiert werden sollen.');
 $arrLang['localizeFields'] = array('Feldwerte lokalisieren', 'Wählen Sie diese Option, wenn die Feldwerte lokalisiert werden sollen.');
+$arrLang['addJoinTables'] = array('Join hinzufügen', 'Wählen Sie diese Option, wenn die verknüpfte Tabelle mit einer oder mehreren anderen Tabellen vereint werden soll.');
+$arrLang['joinTables'] = array('Join-Elemente', '');
+$arrLang['joinTable'] = array('Tabelle', 'Wählen Sie die Tabelle aus, die mit der verknüpften Tabelle vereint werden soll. ');
+$arrLang['joinCondition'] = array('ON-Bedingung', 'Geben Sie hier Bedingungen für die ON-Klausel in der Form "Verknüpfte-Tabelle.Wert = Join-Tabelle.Wert" ein.');
+$arrLang['addUnformattedFields'] = array('Unformatierte Felder nutzen', 'Wählen Sie diese Option, wenn Felder in unformatierter Form exportierbar sein sollen.');
+$arrLang['whereClause'] = array('WHERE-Bedingung', 'Geben Sie hier eine WHERE-Bedingung in der Form column=X an. Bei Join-Abfragen muss die Eingabe in der Form table.column=X erweitert werden. Zeit-Bedingungen müssen als timestamp angegeben werden.');
+$arrLang['orderBy'] = array('ORDER BY-Bedingung', 'Geben Sie hier eine Bedingung an, nach der der Export sortiert werden soll (zB tstamp ASC).');
 
 // export legend
 $arrLang['fileType'] = array('Dateiformat', 'Wählen Sie hier das Dateiformat, in das exportiert werden soll.');

@@ -83,11 +83,11 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 	// Palettes
 	'palettes' => array
 	(
-		'__selector__' => array('fileType', 'addHeaderToExportTable', 'overrideHeaderFieldLabels'),
+		'__selector__' => array('fileType', 'addHeaderToExportTable', 'overrideHeaderFieldLabels', 'addJoinTables'),
 		'default' => '
 		{title_legend},title;
 		{export_legend},target,fileType;
-		{table_legend},globalOperationKey,linkedTable,tableFieldsForExport;',
+		{table_legend},globalOperationKey,linkedTable,addUnformattedFields,tableFieldsForExport,addJoinTables,whereClause,orderBy;',
 	),
 
 	// Subpalettes
@@ -97,7 +97,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 		'fileType_xls' => 'localizeFields,addHeaderToExportTable',
 		'fileType_media' => 'compressionType',
 		'addHeaderToExportTable' => 'localizeHeader,overrideHeaderFieldLabels',
-		'overrideHeaderFieldLabels' => 'headerFieldLabels'
+		'overrideHeaderFieldLabels' => 'headerFieldLabels',
+		'addJoinTables' => 'joinTables'
 	),
 
 	// Fields
@@ -158,11 +159,21 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			),
 			'sql' => "varchar(255) NOT NULL default ''"
 		),
+		'addUnformattedFields' => array
+		(
+				'label' => &$GLOBALS['TL_LANG']['tl_exporter']['addUnformattedFields'],
+				'exclude' => true,
+				'inputType' => 'checkbox',
+				'eval' => array(
+						'submitOnChange' => true,
+						'tl_class' => 'w50 clr'),
+				'sql' => "char(1) NOT NULL default ''"
+		),
 		'tableFieldsForExport' => array
 		(
 			'inputType' => 'checkboxWizard',
 			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['tableFieldsForExport'],
-			'options_callback' => array('tl_exporter', 'getTableFieldsAndUnformatted'),
+			'options_callback' => array('tl_exporter', 'getTableFields'),
 			'exclude' => true,
 			'eval' => array
 			(
@@ -315,6 +326,83 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			),
 			'sql' => "varchar(255) NOT NULL default ''"
 		),
+		'addJoinTables'           => array
+		(
+				'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['addJoinTables'],
+				'exclude'   => true,
+				'inputType' => 'checkbox',
+				'eval'      => array('submitOnChange' => true, 'tl_class' => 'clr'),
+				'sql'       => "char(1) NOT NULL default ''",
+		),
+		'joinTables' => array
+		(
+			'label'        => &$GLOBALS['TL_LANG']['tl_exporter']['joinTables'],
+			'inputType'    => 'fieldpalette',
+			'foreignKey'   => 'tl_fieldpalette.id',
+			'relation'     => array('type' => 'hasMany', 'load' => 'eager'),
+			'sql'          => "blob NULL",
+			'fieldpalette' => array
+			(
+					'config' => array(
+							'hidePublished' => true
+					),
+					'list'     => array
+					(
+							'label' => array
+							(
+									'fields' => array('joinTable', 'joinCondition'),
+									'format' => '%s <span style="color:#b3b3b3;padding-left:3px">[%s]</span>',
+							),
+					),
+					'palettes' => array
+					(
+							'default' => 'joinTable,joinCondition',
+					),
+					'fields'   => array
+					(
+							'joinTable' => array
+							(
+									'label'  => &$GLOBALS['TL_LANG']['tl_exporter']['joinTable'],
+									'exclude' => true,
+									'inputType' => 'select',
+									'options_callback' => array('tl_exporter', 'getAllTablesAsOptions'),
+									'eval' => array
+									(
+											'includeBlankOption' => true,
+									),
+									'sql' => "varchar(255) NOT NULL default ''"
+							),
+							'joinCondition' => array
+							(
+									'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
+									'sorting'   => true,
+									'flag'      => 1,
+									'inputType'   => 'textarea',
+									'exclude'     => true,
+									'eval'        => array('class' => 'monospace', 'rte' => 'ace'),
+									'explanation' => 'insertTags',
+									'sql'         => "text NULL",
+							),
+					),
+			)
+		),
+		'whereClause'           => array
+		(
+				'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['whereClause'],
+				'exclude'   => true,
+				'inputType' => 'text',
+				'eval'      => array('tl_class' => 'w50 clr'),
+				'sql'       => "varchar(255) NOT NULL default ''",
+		),
+		'orderBy'           => array
+		(
+				'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['orderBy'],
+				'exclude'   => true,
+				'inputType' => 'text',
+				'eval'      => array('tl_class' => 'w50 clr'),
+				'sql'       => "varchar(255) NOT NULL default ''",
+		)
+
 	)
 );
 
@@ -333,16 +421,72 @@ class tl_exporter extends \Backend
 
 	public static function getTableFields($objDc)
 	{
+
+		if($objDc->activeRecord->addUnformattedFields)
+		{
+			return tl_exporter::getTableFieldsAndUnformatted($objDc);
+		}
+		if($objDc->activeRecord->addJoinTables && is_array(deserialize($objDc->activeRecord->joinTables)))
+		{
+			$arrJoinTables = array();
+			$arrResult = static::doGetTableFields($objDc->activeRecord->linkedTable, false, $objDc->activeRecord);
+
+			$objJoinTables = HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByIds(deserialize($objDc->activeRecord->joinTables));
+
+			while($objJoinTables->next())
+			{
+				$arrJoinTables[] = $objJoinTables->current()->joinTable;
+			}
+
+			foreach($arrJoinTables as $joinT)
+			{
+				$arrResult = array_merge($arrResult, static::doGetTableFields($joinT, false, $objDc->activeRecord));
+			}
+
+
+
+			return $arrResult;
+		}
+
+
+
+
 		return static::doGetTableFields($objDc->activeRecord->linkedTable);
 	}
 
 	public static function getTableFieldsAndUnformatted(\DataContainer $objDc)
 	{
+		if(is_array(deserialize($objDc->activeRecord->joinTables)))
+		{
+			$arrJoinTables = array();
+			$arrResult = static::doGetTableFields($objDc->activeRecord->linkedTable,
+												  $objDc->activeRecord->fileType != EXPORTER_FILE_TYPE_MEDIA);
+
+			$objJoinTables = HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByIds(deserialize($objDc->activeRecord->joinTables));
+
+			while($objJoinTables->next())
+			{
+				$arrJoinTables[] = $objJoinTables->current()->joinTable;
+			}
+
+			foreach($arrJoinTables as $joinT)
+			{
+				$arrResult = array_merge_recursive($arrResult, static::doGetTableFields($joinT, $joinT != EXPORTER_FILE_TYPE_MEDIA));
+			}
+
+			return $arrResult;
+		}
+
 		return static::doGetTableFields($objDc->activeRecord->linkedTable,
 				$objDc->activeRecord->fileType != EXPORTER_FILE_TYPE_MEDIA);
 	}
 
-	public static function doGetTableFields($strTable, $blnIncludeUnformatted = false)
+	public static function getJoinTableFieldsAndUnformatted(\DataContainer $objDc)
+	{
+		return static::doGetTableFields($objDc->activeRecord->joinTable);
+	}
+
+	public static function doGetTableFields($strTable, $blnIncludeUnformatted = false, $objDc = null)
 	{
 		$arrOptions = array();
 		$arrSkipFields = array('index');
@@ -357,10 +501,13 @@ class tl_exporter extends \Backend
 				return $arrOptions;
 			}
 
+			$keyPreset = $objDc->addJoinTables ? $strTable . '.' : '';
+			$tableRef = $objDc->addJoinTables ? ' - ' . $strTableName : '';
+
 			foreach ($arrFields as $arrField)
 			{
 				if (!in_array($arrField['type'], $arrSkipFields))
-					$arrOptions[$arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']';
+					$arrOptions[$keyPreset . $arrField['name']] = $arrField['name'] . ' [' . $arrField['type'] . ']' . $tableRef;
 			}
 		}
 
@@ -421,7 +568,6 @@ class tl_exporter extends \Backend
 	{
 		$arrTables = array();
 		$strGlobalOperationKey = $dc->activeRecord->globalOperationKey;
-
 		if ($strGlobalOperationKey)
 		{
 			foreach ($GLOBALS['BE_MOD'] as $arrSection)
@@ -440,5 +586,15 @@ class tl_exporter extends \Backend
 		}
 
 		return $arrTables;
+	}
+
+	/**
+	 * Get all tables for possible join
+	 *
+	 * @return array
+	 */
+	public static function getAllTablesAsOptions()
+	{
+		return \Database::getInstance()->listTables();
 	}
 }

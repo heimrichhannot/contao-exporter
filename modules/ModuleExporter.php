@@ -7,6 +7,8 @@ class ModuleExporter
 
 	public static function export()
 	{
+
+
 		$strGlobalOperationKey = \Input::get('key');
 		$strTable = \Input::get('table');
 

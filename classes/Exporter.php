@@ -13,7 +13,6 @@ namespace HeimrichHannot\Exporter;
 
 use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
-use HeimrichHannot\Haste\Util\FormSubmission;
 
 abstract class Exporter extends \Controller
 {
@@ -51,7 +50,6 @@ abstract class Exporter extends \Controller
 		{
 			$this->strFilename = $this->buildFilename();
 		}
-
 		switch ($this->target)
 		{
 			default:
@@ -70,11 +68,38 @@ abstract class Exporter extends \Controller
 		return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . date('Y-m-d_H-i', time()) . '.' . $this->strFileType;
 	}
 
+	protected function cleanFields($arrFields)
+	{
+		$arrResult = array();
+		foreach($arrFields as $field)
+		{
+			$fieldName = substr($field, strpos($field, ".") + 1);
+			if(!in_array($fieldName, $arrResult))
+			{
+				$arrResult[] = $fieldName;
+			}
+			else{
+				$arrResult[] = $field;
+			}
+		}
+
+		return $arrResult;
+	}
+
 	protected function setHeaderFields()
 	{
 		$arrFields = array();
 
-		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
+		$arrExportFields = deserialize($this->tableFieldsForExport, true);
+
+
+
+		if($this->objConfig->current()->addJoinTables)
+		{
+			$arrExportFields = $this->cleanFields($arrExportFields);
+		}
+
+		foreach ($arrExportFields as $strField)
 		{
 			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
 			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
@@ -104,8 +129,23 @@ abstract class Exporter extends \Controller
 			}
 		}
 
+
 		$this->arrHeaderFields = $arrFields;
 	}
+
+	protected function getJoinTables()
+	{
+		$objTables = \HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByIds(deserialize($this->objConfig->current()->joinTables));
+		$arrTables = array();
+
+		while($objTables->next())
+		{
+			$arrTables[] = array('title' => $objTables->current()->joinTable, 'condition' => $objTables->current()->joinCondition);
+		}
+
+		return $arrTables;
+	}
+
 
 	protected function exportToDownload()
 	{
@@ -114,6 +154,7 @@ abstract class Exporter extends \Controller
 
 		$strTmpFile = 'system/tmp/' . $this->strFilename;
 		$arrExportFields = array();
+
 		$arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
 
 		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
@@ -124,19 +165,44 @@ abstract class Exporter extends \Controller
 				$arrExportFields[] = $strField;
 		}
 
-		$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
-			' FROM ' . $this->linkedTable;
 
-		if (TL_MODE == 'BE')
+
+		if($this->objConfig->current()->addJoinTables)
 		{
-			$strAct = \Input::get('act');
-			$intPid = \Input::get('id');
+					$arrJoinTables = $this->getJoinTables();
 
-			if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
+			$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
+						' FROM ' . $this->linkedTable;
+
+			foreach($arrJoinTables as $joinT)
 			{
-				$strQuery .= ' WHERE pid = ' . $intPid;
+				$strQuery .= ' INNER JOIN ' . $joinT['title'] . ' ON ' . $joinT['condition'];
+			}
+
+			if($this->whereClause)
+				$strQuery .= ' WHERE ' . html_entity_decode($this->whereClause);
+		}
+		else{
+			$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
+						' FROM ' . $this->linkedTable;
+			if (TL_MODE == 'BE')
+			{
+				$strAct = \Input::get('act');
+				$intPid = \Input::get('id');
+
+				$strWhere = '';
+				if($this->whereClause)
+					$strWhere = ' AND ' . html_entity_decode($this->whereClause);
+
+				if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
+				{
+					$strQuery .= ' WHERE pid = ' . $intPid . $strWhere;
+				}
 			}
 		}
+
+		if($this->orderBy)
+			$strQuery .= ' ORDER BY ' . $this->orderBy;
 
 		$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
 
@@ -149,13 +215,12 @@ abstract class Exporter extends \Controller
 		// header
 		if ($this->objConfig->addHeaderToExportTable)
 		{
-			foreach ($this->arrHeaderFields as $varValue)
+			foreach ($this->arrHeaderFields as $key => $varValue)
 			{
-				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
+					$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
 
-				$this->processHeaderRow($intCol);
-
-				$intCol++;
+					$this->processHeaderRow($intCol);
+					$intCol++;
 			}
 			$intRow++;
 		}
@@ -165,23 +230,19 @@ abstract class Exporter extends \Controller
 		{
 			$arrRow = $objDbResult->row();
 			$intCol = 0;
-
 			foreach ($arrRow as $key => $varValue)
 			{
+					$objDc = new \DC_Table($this->linkedTable);
+					$objDc->activeRecord = $objDbResult;
+					$varValue = $this->localizeFields ? Helper::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc, $key) : $varValue;
+					if (is_array($varValue))
+						$varValue = Helper::flattenArray($varValue);
 
-				$objDc = new \DC_Table($this->linkedTable);
-				$objDc->activeRecord = $objDbResult;
-				$varValue = $this->localizeFields ?
-					FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc) : $varValue;
-				if (is_array($varValue))
-					$varValue = Arrays::flattenArray($varValue);
+					$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
+					$this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
 
-				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
-				$this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
-
-				$this->processBodyRow($intCol);
-
-				$intCol++;
+					$this->processBodyRow($intCol);
+					$intCol++;
 			}
 			$this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
 			$intRow++;
@@ -200,6 +261,8 @@ abstract class Exporter extends \Controller
 		$objFile = new \File($strTmpFile);
 		$objFile->sendToBrowser();
 	}
+
+
 
 	public function processHeaderRow($intCol) {}
 
