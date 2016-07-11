@@ -103,7 +103,7 @@ class Helper
 				$value   = $strPath ?: $value;
 			}
 		} elseif (\Validator::isBinaryUuid($value)) {
-			$value = \String::binToUuid($value);
+			$value = \StringUtil::binToUuid($value);
 		}
 
 		// Convert special characters (see #1890)
