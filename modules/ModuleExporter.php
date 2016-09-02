@@ -5,12 +5,12 @@ namespace HeimrichHannot\Exporter;
 class ModuleExporter
 {
 
-	public static function export()
+	public static function export($objDc)
 	{
-
-
+		$strExportType = \Input::get('exportType') ? : 'list';
 		$strGlobalOperationKey = \Input::get('key');
-		$strTable = \Input::get('table');
+		$intId = \Input::get('id') ? : '';
+		$strTable = \Input::get('table') ? : $objDc->table;
 
 		if (!$strGlobalOperationKey || !$strTable)
 			return;
@@ -32,16 +32,19 @@ class ModuleExporter
 				case EXPORTER_FILE_TYPE_CSV:
 					$objExporter = new CsvExporter($objConfig);
 					break;
-				case EXPORTER_FILE_TYPE_XLS:
-					$objExporter = new XlsExporter($objConfig);
-					break;
 				case EXPORTER_FILE_TYPE_MEDIA:
 					$objExporter = new MediaExporter($objConfig);
+					break;
+				case EXPORTER_FILE_TYPE_PDF:
+					$objExporter = new PdfExporter($objConfig);
+					break;
+				case EXPORTER_FILE_TYPE_XLS:
+					$objExporter = new XlsExporter($objConfig);
 					break;
 			}
 
 			if ($objExporter)
-				$objExporter->export();
+				$objExporter->export($strExportType, $intId);
 
 			die();
 		}
@@ -52,10 +55,22 @@ class ModuleExporter
 		$arrOperation = array
 		(
 			'label'      => &$strLabel,
-			'href'       => 'key=' . $strName,
+			'href'       => 'exportType=list&key=' . $strName,
 			'class'      => 'header_' . $strName . '_entities',
 			'icon'       => $strIcon,
 			'attributes' => 'onclick="Backend.getScrollOffset()"'
+		);
+
+		return $arrOperation;
+	}
+
+	public static function getOperation($strName, $strLabel = '', $strIcon = '')
+	{
+		$arrOperation = array
+		(
+			'label'      => &$strLabel,
+			'href'       => 'exportType=item&key=' . $strName,
+			'icon'       => $strIcon,
 		);
 
 		return $arrOperation;

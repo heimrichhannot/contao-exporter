@@ -23,9 +23,14 @@ abstract class Exporter extends \Controller
 	 */
 	protected $objPhpExcel;
 	protected $strWriterOutputType;
-	
+
+	protected $blnJoin = false;
+	protected $blnResetJoin = false;
+
+	protected $strExportType;
 	protected $strFilename;
 	protected $strFileType;
+	protected $strTemplate = '';
 
 	public function __construct($objConfig)
 	{
@@ -44,18 +49,35 @@ abstract class Exporter extends \Controller
 		\System::loadLanguageFile($this->linkedTable);
 	}
 
-	public function export()
+	public function export($strExportType='list', $intId = null)
 	{
+		$this->setExportType($strExportType);
+
 		if (!$this->strFilename)
 		{
-			$this->strFilename = $this->buildFilename();
+			$this->strFilename = $this->buildFilename($intId);
 		}
 		switch ($this->target)
 		{
 			default:
-				$this->exportToDownload();
+				$this->exportToDownload($intId);
 				break;
 		}
+	}
+
+	public function setJoin($blnJoin)
+	{
+		$this->blnJoin = $blnJoin;
+	}
+
+	public function setJoinReset($blnJoinReset)
+	{
+		$this->blnResetJoin = $blnJoinReset;
+	}
+
+	public function setExportType($strExportType)
+	{
+		$this->strExportType = $strExportType;
 	}
 
 	public function setFilename($strFilename)
@@ -63,9 +85,25 @@ abstract class Exporter extends \Controller
 		$this->strFilename = $strFilename;
 	}
 
-	protected function buildFilename()
+	public function setTemplate($strTemplate)
 	{
-		return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . date('Y-m-d_H-i', time()) . '.' . $this->strFileType;
+		$this->strTemplate = $strTemplate;
+	}
+
+	protected function buildFilename($intId)
+	{
+		switch($this->strExportType)
+		{
+			case 'item':
+				if ($intId != null)
+				{
+					return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . $intId . '_' . date('Y-m-d_H-i', time()) . '.' . $this->fileType;
+				}
+
+			case 'list':
+			default :
+				return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . date('Y-m-d_H-i', time()) . '.' . $this->fileType;
+		}
 	}
 
 	protected function cleanFields($arrFields)
@@ -165,8 +203,6 @@ abstract class Exporter extends \Controller
 				$arrExportFields[] = $strField;
 		}
 
-
-
 		if($this->objConfig->current()->addJoinTables)
 		{
 					$arrJoinTables = $this->getJoinTables();
@@ -262,6 +298,12 @@ abstract class Exporter extends \Controller
 		$objFile->sendToBrowser();
 	}
 
+	public function parseTemplate($arrFields)
+	{
+		$objTemplate = new \FrontendTemplate($this->strTemplate);
+		$objTemplate->arrFields = $arrFields;
+		return $objTemplate->parse();
+	}
 
 
 	public function processHeaderRow($intCol) {}

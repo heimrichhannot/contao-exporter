@@ -23,14 +23,18 @@ $arrLang['orderBy'] = array('ORDER BY-Bedingung', 'Geben Sie hier eine Bedingung
 // export legend
 $arrLang['fileType'] = array('Dateiformat', 'Wählen Sie hier das Dateiformat, in das exportiert werden soll.');
 $arrLang['fileType'][EXPORTER_FILE_TYPE_CSV] = 'CSV (kommaseparierte Werte)';
-$arrLang['fileType'][EXPORTER_FILE_TYPE_XLS] = 'XLS (Microsoft Excel)';
 $arrLang['fileType'][EXPORTER_FILE_TYPE_MEDIA] = 'Verknüpfte Dateien als Archiv';
+$arrLang['fileType'][EXPORTER_FILE_TYPE_PDF] = 'PDF';
+$arrLang['fileType'][EXPORTER_FILE_TYPE_XLS] = 'XLS (Microsoft Excel)';
 $arrLang['target'] = array('Ziel', 'Wählen Sie hier das Dateiformat, in das exportiert werden soll.');
 $arrLang['target'][EXPORTER_TARGET_DOWNLOAD] = 'Download';
 $arrLang['fieldDelimiter'] = array('Feld-Trennzeichen', 'Geben Sie hier das Feld-Trennzeichen ein.');
 $arrLang['fieldEnclosure'] = array('Text-Trennzeichen', 'Geben Sie hier das Text-Trennzeichen ein.');
 $arrLang['compressionType'] = array('Kompressionsformat', 'Wählen Sie hier aus, in welchem Format die exportierten Binärdateien zusammengefasst werden sollen.');
 $arrLang['compressionType']['zip'] = 'ZIP';
+$arrLang['pdfBackground'] = array('Hintergrund', 'Wählen Sie hier ein PDF-Template als grafisches Grundgerüst.');
+$arrLang['pdfTemplate'] = array('Template', 'Wählen Sie hier ein Template für die PDF.');
+
 
 // header
 $arrLang['addHeaderToExportTable'] = array('Feldnamen im Tabellenkopf anzeigen', 'Wählen Sie diese Option, wenn der Tabelle ein Tabellenkopf hinzugefügt werden soll.');

@@ -6,6 +6,7 @@ $arrLang = &$GLOBALS['TL_LANG']['MSC'];
  * Fields
  */
 $arrLang['export_csv'] = array('Exportieren (CSV)', 'Als CSV-Datei exportieren');
+$arrLang['export_pdf'] = array('Exportieren (PDF)', 'Als PDF-Datei exportieren');
 $arrLang['export_xls'] = array('Exportieren (Excel)', 'Als Excel-Datei exportieren');
 
 /**

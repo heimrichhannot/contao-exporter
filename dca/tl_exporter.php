@@ -94,6 +94,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 	'subpalettes' => array
 	(
 		'fileType_csv' => 'fieldDelimiter,fieldEnclosure,localizeFields,addHeaderToExportTable',
+		'fileType_pdf' => 'pdfBackground,pdfTemplate',
 		'fileType_xls' => 'localizeFields,addHeaderToExportTable',
 		'fileType_media' => 'compressionType',
 		'addHeaderToExportTable' => 'localizeHeader,overrideHeaderFieldLabels',
@@ -190,7 +191,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 			'label' => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
 			'exclude' => true,
 			'inputType' => 'select',
-			'options' => array(EXPORTER_FILE_TYPE_CSV, EXPORTER_FILE_TYPE_XLS, EXPORTER_FILE_TYPE_MEDIA),
+			'options' => array(EXPORTER_FILE_TYPE_CSV, EXPORTER_FILE_TYPE_PDF, EXPORTER_FILE_TYPE_XLS, EXPORTER_FILE_TYPE_MEDIA),
 			'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
 			'eval' => array
 			(
@@ -401,8 +402,31 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
 				'inputType' => 'text',
 				'eval'      => array('tl_class' => 'w50 clr'),
 				'sql'       => "varchar(255) NOT NULL default ''",
-		)
-
+		),
+		'pdfBackground' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_exporter']['pdfBackground'],
+			'inputType'               => 'fileTree',
+			'exclude'                 => true,
+			'eval'                    => array(
+				'filesOnly' => true,
+				'extensions' => 'pdf',
+				'fieldType' => 'radio',
+				'tl_class' => 'w50'),
+			'sql'                     => "binary(16) NULL"
+		),
+		'pdfTemplate' => array
+		(
+			'label'                   => &$GLOBALS['TL_LANG']['tl_exporter']['pdfTemplate'],
+			'exclude'          => true,
+			'inputType'        => 'select',
+			'options_callback' => array('tl_exporter', 'getPdfExporterTemplates'),
+			'eval'             => array(
+				'tl_class' => 'w50',
+				'includeBlankOption' => true
+			),
+			'sql'              => "varchar(255) NOT NULL default ''"
+		),
 	)
 );
 
@@ -421,7 +445,6 @@ class tl_exporter extends \Backend
 
 	public static function getTableFields($objDc)
 	{
-
 		if($objDc->activeRecord->addUnformattedFields)
 		{
 			return tl_exporter::getTableFieldsAndUnformatted($objDc);
@@ -443,13 +466,8 @@ class tl_exporter extends \Backend
 				$arrResult = array_merge($arrResult, static::doGetTableFields($joinT, false, $objDc->activeRecord));
 			}
 
-
-
 			return $arrResult;
 		}
-
-
-
 
 		return static::doGetTableFields($objDc->activeRecord->linkedTable);
 	}
@@ -596,5 +614,16 @@ class tl_exporter extends \Backend
 	public static function getAllTablesAsOptions()
 	{
 		return \Database::getInstance()->listTables();
+	}
+
+
+	/**
+	 * Return available PDF templates for the pdf exporter
+	 *
+	 * @return mixed
+	 */
+	public function getPdfExporterTemplates()
+	{
+		return $this->getTemplateGroup('exporter_pdf_');
 	}
 }
