@@ -229,6 +229,7 @@ abstract class Exporter extends \Controller
 			{
 				$objDc = new \DC_Table($this->linkedTable);
 				$objDc->activeRecord = $objDbResult;
+				$objDc->id = $objDbResult->id;
 				$varValue = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc) : $varValue;
 				if (is_array($varValue))
 					$varValue = Arrays::flattenArray($varValue);
