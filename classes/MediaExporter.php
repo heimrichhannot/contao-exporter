@@ -14,6 +14,7 @@ namespace HeimrichHannot\Exporter;
 use Contao\DC_Table;
 use Contao\ZipWriter;
 use HeimrichHannot\Haste\Util\Files;
+use HeimrichHannot\Haste\Util\FormSubmission;
 
 class MediaExporter
 {
@@ -56,7 +57,7 @@ class MediaExporter
 			{
 				$objDc = new DC_Table($this->linkedTable);
 				$objDc->activeRecord = $objDbResult;
-				$varValue = Helper::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc);
+				$varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc);
 
 				if (!is_array($varValue))
 					$varValue = array($varValue);
