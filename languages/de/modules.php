@@ -4,7 +4,7 @@
  * Frontend
  */
 $GLOBALS['TL_LANG']['FMD']['exporter'] = 'Exporter';
-$GLOBALS['TL_LANG']['FMD']['frontendExporter'] = array('Frontend Exporter', 'Erlaubt die Benutzung von Exportkonfigurationen im Frondend');
+$GLOBALS['TL_LANG']['FMD']['frontendExporter'] = array('Frontend Exporter', 'Erlaubt die Benutzung von Exportkonfigurationen im Frontend');
 
 
 /**
