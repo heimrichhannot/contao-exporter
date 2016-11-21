@@ -1,12 +1,42 @@
 # Exporter
 
-A backend module for exporting any contao entity.
+A module for exporting any contao entity.
 
 ![alt myModulePreview](docs/screenshot.png)
 
 *Export config preview*
 
+## Features
+
+- export an entity list in the backend
+- export of entities in the frontend
+- currently supported file types:
+    - csv
+    - xls
+    - pdf
+    - zip (media file export as zip)
+
+### Classes
+
+Name | Description
+---- | -----------
+CsvExporter | An exporter for writing entity instances into a CSV file
+XlsExporter | An exporter for writing entity instances into an excel file (XLS)
+MediaExporter | An exporter that combines all files referenced by the selected properties of an entity in one archive file (e.g. zip) preserving the folder structure
+PdfExporter | An exporter for creating a pdf out of an entity
+
+### Hooks
+
+Name | Arguments | Expected return value | Description
+---- | --------- | --------------------- | -----------
+exporter_modifyHeaderFields | $arrFields, $objExporter | $arrFields | Modify the header fields just before just before being written to file
+exporter_modifyMediaFilename | $objFile, $strFieldname, $varFieldValue, $objMediaExporter | $objFile->path | Modify a filename just before added to the archive when using *MediaExporter* (also folder structure could be modified here)
+exporter_modifyFilename | $strFilename, $objExporter | $strFilename | Modify the export filename
+exporter_modifyFilePath | $strFilePath, $objExporter | $strFilePath | Modify the export file path
+
 ## Technical instruction
+
+### Backend export
 
 ### Step 1
 Define your global operation in your entity's dca as follows:
@@ -33,38 +63,18 @@ $GLOBALS['BE_MOD']['mygroup'] = array
 ### Step 3
 Create a configuration for your export by using the exporter's backend module (group devtools).
 
-## Features
+## Frontend
 
-### Classes
+You can use [frontendedit](https://github.com/heimrichhannot/contao-frontendedit) or [formhybrid_list](https://github.com/heimrichhannot/contao-formhybrid_list) in order to easily create a module for manipulating your entities in the frontend. It already contains a function to export entities after submission!
 
-Name | Description
----- | -----------
-CsvExporter | An exporter for writing entity instances into a CSV file
-XlsExporter | An exporter for writing entity instances into an excel file (XLS)
-MediaExporter | An exporter that combines all files referenced by the selected properties of an entity in one archive file (e.g. zip) preserving the folder structure
+### Step 1
+Create a configuration for your export by using the exporter's backend module (group devtools).
 
-### Fields
+### Step 2
+Add the following code to your module in order to your module:
 
-tl_exporter:
+```
+ModuleExporter::export($objConfig, $objEntity, $arrFields);
+```
 
-Name | Description
----- | -----------
-title | The export configuration's title
-fileType | The type of exporter
-target | The target of the exporter
-fieldDelimiter | Determines the delimiter character (e.g. ,)
-fieldEnclosure | Determines the enclosure character (e.g. ")
-addHeaderToExportTable | Determines whether a header row is added to the export
-compressionType | Determines the type of compression (atm zip only)
-localizeHeader | Determines whether field names get localized
-localizeFields | Determines whether field values also get localized
-globalOperationKey | The operation key defined in your entity's dca
-linkedTable | The entity's table to export
-tableFieldsForExport | The table's fields to export (in most cases divided in formatted (e.g. 2016/01/20) and unformatted (e.g. 1453297849))
-
-### Hooks
-
-Name | Arguments | Expected return value | Description
----- | --------- | --------------------- | -----------
-exporter_modifyHeaderFields | $arrFields, $objExporter | $arrFields | Modify the header fields just before just before being written to file
-exporter_modifyMediaFilename | $objFile, $strFieldname, $varFieldValue, $objMediaExporter | $objFile->path | Modify a filename just before added to the archive when using *MediaExporter* (also folder structure could be modified here)
+If you add ```$arrFields```, this array will be iteratd automatically in your template. Alternatively you can print every entity's property using $this in the template.

@@ -7,11 +7,12 @@
  * @author  Oliver Janke <o.janke@heimrich-hannot.de>
  * @license http://www.gnu.org/licences/lgpl-3.0.html LGPL
  */
-namespace HeimrichHannot\Exporter;
+namespace HeimrichHannot\Exporter\Concrete;
 use Contao\DC_Table;
 use Contao\ZipWriter;
 use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
+use HeimrichHannot\Haste\Util\FormSubmission;
 
 class MediaExporter
 {
@@ -48,7 +49,8 @@ class MediaExporter
 			{
 				$objDc = new DC_Table($this->linkedTable);
 				$objDc->activeRecord = $objDbResult;
-				$varValue = Arrays::getFormatedValueByDca($varValue, $arrDca['fields'][$key], $objDc);
+
+				$varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc);
 				if (!is_array($varValue))
 					$varValue = array($varValue);
 				foreach ($varValue as $strPath)

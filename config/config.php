@@ -9,7 +9,6 @@ define('EXPORTER_FILE_TYPE_MEDIA', 'media');
 define('EXPORTER_FILE_TYPE_PDF', 'pdf');
 define('EXPORTER_FILE_TYPE_XLS', 'xls');
 define('EXPORTER_COMPESSION_TYPE_ZIP', 'zip');
-define('EXPORTER_TARGET_DOWNLOAD', 'download');
 define('EXPORTER_FRONTEND_FORMID', 'exporter_download');
 
 

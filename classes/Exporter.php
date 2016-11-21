@@ -8,259 +8,314 @@
  * @license http://www.gnu.org/licences/lgpl-3.0.html LGPL
  */
 namespace HeimrichHannot\Exporter;
+
 use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
 use HeimrichHannot\Haste\Util\FormSubmission;
 
 abstract class Exporter extends \Controller
 {
-	protected $objConfig;
+    protected $objConfig;
 
-	/**
-	 * @var \PHPExcel
-	 */
-	protected $objPhpExcel;
-	protected $strWriterOutputType;
-	protected $blnJoin = false;
-	protected $blnResetJoin = false;
-	protected $strExportType;
-	protected $strFilename;
-	protected $strFileType;
-	protected $strTemplate = '';
+    /**
+     * @var \PHPExcel
+     */
+    protected $objPhpExcel;
+    protected $strWriterOutputType;
+    protected $strFilename;
+    protected $strFileDir;
+    protected $strTemplate = '';
 
-	public function __construct($objConfig)
-	{
-		$this->objConfig = $objConfig;
-		$arrSkipFields = array('id', 'tstamp', 'title');
-		foreach ($objConfig->row() as $strField => $varValue)
-		{
-			if (in_array($strField, $arrSkipFields))
-				continue;
-			$this->{$strField} = $varValue;
-		}
-		\Controller::loadDataContainer($this->linkedTable);
-		\System::loadLanguageFile($this->linkedTable);
-	}
+    const TYPE_ITEM = 'item';
+    const TYPE_LIST = 'list';
 
-	public function export($strExportType='list', $intId = null)
-	{
-		$this->setExportType($strExportType);
-		if (!$this->strFilename)
-		{
-			$this->strFilename = $this->buildFilename($intId);
-		}
-		switch ($this->target)
-		{
-			default:
-				$this->exportToDownload($intId);
-				break;
-		}
-	}
+    const TARGET_DOWNLOAD = 'download';
+    const TARGET_FILE     = 'file';
 
-	public function setJoin($blnJoin)
-	{
-		$this->blnJoin = $blnJoin;
-	}
+    public function __construct($objConfig)
+    {
+        $this->objConfig = $objConfig;
+        $arrSkipFields   = array('id', 'tstamp', 'title');
 
-	public function setJoinReset($blnJoinReset)
-	{
-		$this->blnResetJoin = $blnJoinReset;
-	}
+        // add all config attributes to the scope of this class
+        foreach ($objConfig->row() as $strField => $varValue)
+        {
+            if (in_array($strField, $arrSkipFields))
+            {
+                continue;
+            }
 
-	public function setExportType($strExportType)
-	{
-		$this->strExportType = $strExportType;
-	}
-	public function setFilename($strFilename)
-	{
-		$this->strFilename = $strFilename;
-	}
+            $this->{$strField} = $varValue;
+        }
 
-	public function setTemplate($strTemplate)
-	{
-		$this->strTemplate = $strTemplate;
-	}
+        \Controller::loadDataContainer($this->linkedTable);
+        \System::loadLanguageFile($this->linkedTable);
+    }
 
-	protected function buildFilename($intId)
-	{
-		switch($this->strExportType)
-		{
-			case 'item':
-				if ($intId != null)
-				{
-					return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . $intId . '_' . date('Y-m-d_H-i', time()) . '.' . $this->fileType;
-				}
-			case 'list':
-			default :
-				return 'export-' . Files::sanitizeFileName(Helper::getArchiveName($this->linkedTable)) . '_' . date('Y-m-d_H-i', time()) . '.' . $this->fileType;
-		}
-	}
+    public function export($objEntity = null, array $arrFields = array())
+    {
+        if (!$this->strFilename)
+        {
+            $this->strFilename = $this->buildFilename($objEntity);
+        }
 
-	protected function cleanFields($arrFields)
-	{
-		$arrResult = array();
-		foreach($arrFields as $field)
-		{
-			$fieldName = substr($field, strpos($field, ".") + 1);
-			if(!in_array($fieldName, $arrResult))
-			{
-				$arrResult[] = $fieldName;
-			}
-			else{
-				$arrResult[] = $field;
-			}
-		}
-		return $arrResult;
-	}
+        if (!$this->strFileDir && $this->target == static::TARGET_FILE)
+        {
+            $this->strFileDir = $this->buildFileDir($objEntity);
+        }
 
-	protected function setHeaderFields()
-	{
-		$arrFields = array();
-		$arrExportFields = deserialize($this->tableFieldsForExport, true);
-		if($this->objConfig->current()->addJoinTables)
-		{
-			$arrExportFields = $this->cleanFields($arrExportFields);
-		}
-		foreach ($arrExportFields as $strField)
-		{
-			$blnRawField = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
-			$strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
-			$strFieldName = $GLOBALS['TL_DCA'][$this->linkedTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
-			$strLabel = $strField;
-			if ($this->overrideHeaderFieldLabels && ($arrRow =
-							Arrays::getRowInMcwArray('field', $strField, deserialize($this->headerFieldLabels, true))) !== false)
-			{
-				$strLabel = $arrRow['label'];
-			}
-			elseif ($this->localizeHeader && $strFieldName)
-			{
-				$strLabel = $strFieldName;
-			}
-			$arrFields[$strField] = strip_tags(html_entity_decode($strLabel)) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
-		}
-		if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']))
-		{
-			foreach ($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'] as $callback)
-			{
-				$objCallback = \System::importStatic($callback[0]);
-				$arrFields = $objCallback->$callback[1]($arrFields, $this);
-			}
-		}
-		$this->arrHeaderFields = $arrFields;
-	}
+        $this->updateFields($arrFields);
 
-	protected function getJoinTables()
-	{
-		$objTables = \HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByIds(deserialize($this->objConfig->current()->joinTables));
-		$arrTables = array();
-		while($objTables->next())
-		{
-			$arrTables[] = array('title' => $objTables->current()->joinTable, 'condition' => $objTables->current()->joinCondition);
-		}
-		return $arrTables;
-	}
+        $objResult = $this->doExport($objEntity, $arrFields);
 
-	protected function exportToDownload()
-	{
-		if (!$this->objPhpExcel)
-			die('Define objPhpExcel in your Exporter class or overwrite exportToDownload.');
-		$strTmpFile = 'system/tmp/' . $this->strFilename;
-		$arrExportFields = array();
-		$arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
-		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
-		{
-			if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
-				$arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS ' . $strField;
-			else
-				$arrExportFields[] = $strField;
-		}
-		if($this->objConfig->current()->addJoinTables)
-		{
-			$arrJoinTables = $this->getJoinTables();
-			$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
-						' FROM ' . $this->linkedTable;
-			foreach($arrJoinTables as $joinT)
-			{
-				$strQuery .= ' INNER JOIN ' . $joinT['title'] . ' ON ' . $joinT['condition'];
-			}
-			if($this->whereClause)
-				$strQuery .= ' WHERE ' . html_entity_decode($this->whereClause);
-		}
-		else{
-			$strQuery = 'SELECT ' . implode(',', $arrExportFields) .
-						' FROM ' . $this->linkedTable;
-			if (TL_MODE == 'BE')
-			{
-				$strAct = \Input::get('act');
-				$intPid = \Input::get('id');
-				$strWhere = '';
-				if($this->whereClause)
-					$strWhere = ' AND ' . html_entity_decode($this->whereClause);
-				if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
-				{
-					$strQuery .= ' WHERE pid = ' . $intPid . $strWhere;
-				}
-			}
-		}
-		if($this->orderBy)
-			$strQuery .= ' ORDER BY ' . $this->orderBy;
-		$objDbResult = \Database::getInstance()->prepare($strQuery)->execute();
-		if (!$objDbResult->numRows > 0)
-			return;
-		$intCol = 0;
-		$intRow = 1;
-		// header
-		if ($this->objConfig->addHeaderToExportTable)
-		{
-			foreach ($this->arrHeaderFields as $key => $varValue)
-			{
-				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
-				$this->processHeaderRow($intCol);
-				$intCol++;
-			}
-			$intRow++;
-		}
-		// body
-		while($objDbResult->next())
-		{
-			$arrRow = $objDbResult->row();
-			$intCol = 0;
-			foreach ($arrRow as $key => $varValue)
-			{
-				$objDc = new \DC_Table($this->linkedTable);
-				$objDc->activeRecord = $objDbResult;
-				$objDc->id = $objDbResult->id;
-				$varValue = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc) : $varValue;
-				if (is_array($varValue))
-					$varValue = Arrays::flattenArray($varValue);
-				$this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, html_entity_decode($varValue));
-				$this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
-				$this->processBodyRow($intCol);
-				$intCol++;
-			}
-			$this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
-			$intRow++;
-		}
-		$this->objPhpExcel->setActiveSheetIndex(0);
-		$this->objPhpExcel->getActiveSheet()->setTitle('Export');
-		// send file to browser
-		$objWriter = \PHPExcel_IOFactory::createWriter($this->objPhpExcel, $this->strWriterOutputType);
-		$this->updateWriter($objWriter);
-		$objWriter->save(TL_ROOT . '/' . $strTmpFile);
-		$objFile = new \File($strTmpFile);
-		$objFile->sendToBrowser();
-	}
+        switch ($this->target)
+        {
+            case static::TARGET_FILE:
+                $this->exportToFile($objResult);
+                break;
+            case static::TARGET_DOWNLOAD:
+                $this->exportToDownload($objResult);
+                break;
+        }
+    }
 
-	public function parseTemplate($arrFields)
-	{
-		$objTemplate = new \FrontendTemplate($this->strTemplate);
-		$objTemplate->arrFields = $arrFields;
-		return $objTemplate->parse();
-	}
+    protected function updateFields(array &$arrFields) { }
 
-	public function processHeaderRow($intCol) {}
+    protected function buildFileDir($objEntity = null)
+    {
+        if ($this->fileDir && $objFolder = \FilesModel::findByUuid($this->fileDir))
+        {
+            $objMember = \FrontendUser::getInstance();
+            $strDir    = $objFolder->path;
 
-	public function processBodyRow($intCol) {}
+            if ($this->useHomeDir && FE_USER_LOGGED_IN && $objMember->assignDir && $objMember->homeDir)
+            {
+                $strDir = Files::getPathFromUuid($objMember->homeDir);
+            }
 
-	public function updateWriter($objWriter) {}
+            if (in_array('protected_homedirs', \ModuleLoader::getActive()))
+            {
+                if ($this->useProtectedHomeDir && $objMember->assignProtectedDir && $objMember->protectedHomeDir)
+                {
+                    $strDir = Files::getPathFromUuid($objMember->protectedHomeDir);
+                }
+            }
+
+            if ($this->fileSubDirName)
+            {
+                $strDir .= '/' . $this->fileSubDirName;
+            }
+
+            if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFileDir']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyFileDir']))
+            {
+                foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFileDir'] as $callback)
+                {
+                    $objCallback      = \System::importStatic($callback[0]);
+                    $strFixedDir = $objCallback->$callback[1]($strDir, $this);
+
+                    $strDir = $strFixedDir ?: $strDir;
+                }
+            }
+
+            return $strDir;
+        }
+
+        throw new \Exception('No exporter fileDir defined!');
+    }
+
+    protected function buildFilename($objEntity = null)
+    {
+        $strFilename = $this->fileName ?: 'export';
+
+        if ($this->fileNameAddDatime)
+        {
+            $strFilename = date($this->fileNameAddDatimeFormat ?: \Config::get('datimFormat')) . '_' . $strFilename;
+        }
+
+        if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyFilename']))
+        {
+            foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFilename'] as $callback)
+            {
+                $objCallback      = \System::importStatic($callback[0]);
+                $strFixedFilename = $objCallback->$callback[1]($strFilename, $this);
+
+                $strFilename = $strFixedFilename ?: $strFilename;
+            }
+        }
+
+        return $strFilename . '.' . $this->fileType;
+    }
+
+    protected function setHeaderFields()
+    {
+        if (!$this->addHeaderToExportTable)
+        {
+            return;
+        }
+
+        $arrFields = array();
+
+        foreach (deserialize($this->tableFieldsForExport, true) as $strField)
+        {
+            list($strTable, $strField) = explode('.', $strField);
+
+            $blnRawField     = strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false;
+            $strRawFieldName = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField);
+            \Controller::loadDataContainer($strTable);
+            \System::loadLanguageFile($strTable);
+
+            $strFieldName = $GLOBALS['TL_DCA'][$strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
+            $strLabel     = $strField;
+
+            if ($this->overrideHeaderFieldLabels
+                && ($arrRow = Arrays::getRowInMcwArray('field', $strField, deserialize($this->headerFieldLabels, true))) !== false
+            )
+            {
+                $strLabel = $arrRow['label'];
+            }
+            elseif ($this->localizeHeader && $strFieldName)
+            {
+                $strLabel = $strFieldName;
+            }
+
+            $arrFields[$strField] = strip_tags(html_entity_decode($strLabel)) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
+        }
+        if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'])
+            && is_array(
+                $GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']
+            )
+        )
+        {
+            foreach ($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'] as $callback)
+            {
+                $objCallback = \System::importStatic($callback[0]);
+                $arrFields   = $objCallback->$callback[1]($arrFields, $this);
+            }
+        }
+
+        $this->arrHeaderFields = $arrFields;
+    }
+
+    protected function getEntities()
+    {
+        $arrExportFields = array();
+        $arrDca          = $GLOBALS['TL_DCA'][$this->linkedTable];
+
+        foreach (deserialize($this->tableFieldsForExport, true) as $strField)
+        {
+            if (strpos($strField, EXPORTER_RAW_FIELD_SUFFIX) !== false)
+            {
+                $arrExportFields[] = str_replace(EXPORTER_RAW_FIELD_SUFFIX, '', $strField) . ' AS "' . $strField . '"';
+            }
+            else
+            {
+                $arrExportFields[] = $strField;
+            }
+        }
+
+        // SELECT
+        $strQuery = 'SELECT ' . implode(',', $arrExportFields) . ' FROM ' . $this->linkedTable;
+
+        // JOIN
+        if ($this->addJoinTables)
+        {
+            $arrJoinTables = Helper::getJoinTablesAndConditions($this->objConfig->id);
+
+            foreach ($arrJoinTables as $joinT)
+            {
+                $strQuery .= ' INNER JOIN ' . $joinT['table'] . ' ON ' . $joinT['condition'];
+            }
+        }
+
+        // WHERE
+        $arrWheres = array();
+        if ($this->whereClause)
+        {
+            $arrWheres[] = html_entity_decode($this->whereClause);
+        }
+
+        // limit to archive
+        if (TL_MODE == 'BE' && ($this->type == Exporter::TYPE_LIST || !$this->type))
+        {
+            $strAct = \Input::get('act');
+            $intPid = \Input::get('id');
+
+            if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
+            {
+                $arrWheres[] = 'pid = ' . $intPid;
+            }
+        }
+
+        if (!empty($arrWheres))
+        {
+            $strQuery .= ' WHERE ' . implode(
+                    ' AND ',
+                    array_map(
+                        function ($val)
+                        {
+                            return '(' . $val . ')';
+                        },
+                        $arrWheres
+                    )
+                );
+        }
+
+        // ORDER BY
+        if ($this->orderBy)
+        {
+            $strQuery .= ' ORDER BY ' . $this->orderBy;
+        }
+
+        return \Database::getInstance()->prepare($strQuery)->execute();
+    }
+
+    protected abstract function doExport($objEntity = null, array $arrFields = array());
+
+    public abstract function exportToDownload($objResult);
+
+    public abstract function exportToFile($objResult);
+
+    public function processHeaderRow($intCol)
+    {
+    }
+
+    public function processBodyRow($intCol)
+    {
+    }
+
+    public function updateWriter($objWriter)
+    {
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFilename()
+    {
+        return $this->strFilename;
+    }
+
+    /**
+     * @param mixed $strFilename
+     */
+    public function setFilename($strFilename)
+    {
+        $this->strFilename = $strFilename;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFileDir()
+    {
+        return $this->strFileDir;
+    }
+
+    /**
+     * @param mixed $strFileDir
+     */
+    public function setFileDir($strFileDir)
+    {
+        $this->strFileDir = $strFileDir;
+    }
 }

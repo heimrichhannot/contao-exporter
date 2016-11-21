@@ -27,16 +27,18 @@ ClassLoader::addClasses(array
 	'HeimrichHannot\Exporter\ModuleFrontendExporter' => 'system/modules/exporter/modules/ModuleFrontendExporter.php',
 	'HeimrichHannot\Exporter\ModuleExporter'         => 'system/modules/exporter/modules/ModuleExporter.php',
 
-	// Models
-	'HeimrichHannot\Exporter\ExporterModel'          => 'system/modules/exporter/models/ExporterModel.php',
-
 	// Classes
-	'HeimrichHannot\Exporter\CsvExporter'            => 'system/modules/exporter/classes/CsvExporter.php',
-	'HeimrichHannot\Exporter\PdfExporter'            => 'system/modules/exporter/classes/PdfExporter.php',
+	'HeimrichHannot\Exporter\Backend'                => 'system/modules/exporter/classes/Backend.php',
+	'HeimrichHannot\Exporter\Concrete\XlsExporter'   => 'system/modules/exporter/classes/concrete/XlsExporter.php',
+	'HeimrichHannot\Exporter\Concrete\CsvExporter'   => 'system/modules/exporter/classes/concrete/CsvExporter.php',
+	'HeimrichHannot\Exporter\Concrete\MediaExporter' => 'system/modules/exporter/classes/concrete/MediaExporter.php',
+	'HeimrichHannot\Exporter\Concrete\PdfExporter'   => 'system/modules/exporter/classes/concrete/PdfExporter.php',
+	'HeimrichHannot\Exporter\PhpExcelExporter'       => 'system/modules/exporter/classes/PhpExcelExporter.php',
 	'HeimrichHannot\Exporter\Exporter'               => 'system/modules/exporter/classes/Exporter.php',
 	'HeimrichHannot\Exporter\Helper'                 => 'system/modules/exporter/classes/Helper.php',
-	'HeimrichHannot\Exporter\MediaExporter'          => 'system/modules/exporter/classes/MediaExporter.php',
-	'HeimrichHannot\Exporter\XlsExporter'            => 'system/modules/exporter/classes/XlsExporter.php',
+
+	// Models
+	'HeimrichHannot\Exporter\ExporterModel'          => 'system/modules/exporter/models/ExporterModel.php',
 ));
 
 
@@ -46,5 +48,5 @@ ClassLoader::addClasses(array
 TemplateLoader::addFiles(array
 (
 	'mod_frontend_export'       => 'system/modules/exporter/templates/modules',
-	'exporter_pdf_default_item' => 'system/modules/exporter/templates',
+	'exporter_pdf_item_default' => 'system/modules/exporter/templates',
 ));

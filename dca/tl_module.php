@@ -39,19 +39,6 @@ $arrFields = array(
 		),
 		'sql'              => "int(10) unsigned NOT NULL default '0'"
 	),
-	'exporterExportType' => array
-	(
-		'label'     => &$GLOBALS['TL_LANG']['tl_module']['exporterExportType'],
-		'inputType' => 'select',
-		'options'   => array('list', 'item'),
-		'reference' => &$GLOBALS['TL_LANG']['tl_module']['exporterExportType'],
-		'eval'      => array(
-			'mandatory'      => true,
-			'submitOnChange' => true,
-			'tl_class'       => 'w50'
-		),
-		'sql'       => "varchar(4) NOT NULL default ''"
-	),
 	'exporterBtnLabel' => array
 	(
 		'label'     => &$GLOBALS['TL_LANG']['tl_module']['exporterBtnLabel'],

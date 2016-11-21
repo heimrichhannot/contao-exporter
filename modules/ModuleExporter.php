@@ -5,80 +5,80 @@ namespace HeimrichHannot\Exporter;
 class ModuleExporter
 {
 
-	public static function export($objDc)
-	{
-		$strExportType = \Input::get('exportType') ? : 'list';
-		$strGlobalOperationKey = \Input::get('key');
-		$intId = \Input::get('id') ? : '';
-		$strTable = \Input::get('table') ? : $objDc->table;
+    public static function exportBe($objDc)
+    {
+        $strGlobalOperationKey = \Input::get('key');
+        $strTable              = \Input::get('table') ?: $objDc->table;
 
-		if (!$strGlobalOperationKey || !$strTable)
-			return;
+        if (!$strGlobalOperationKey || !$strTable)
+        {
+            return;
+        }
 
-		if (($objConfig = ExporterModel::findByKeyAndTable($strGlobalOperationKey, $strTable)) === null)
-		{
-			if (empty($_SESSION['TL_ERROR']))
-			{
-				\Message::addError($GLOBALS['TL_LANG']['MSC']['exporter']['noConfigFound']);
-				\Controller::redirect($_SERVER['HTTP_REFERER']);
-			}
-		}
-		else
-		{
-			$objExporter = null;
+        if (($objConfig = ExporterModel::findByKeyAndTable($strGlobalOperationKey, $strTable)) === null)
+        {
+            if (empty($_SESSION['TL_ERROR']))
+            {
+                \Message::addError($GLOBALS['TL_LANG']['MSC']['exporter']['noConfigFound']);
+                \Controller::redirect($_SERVER['HTTP_REFERER']);
+            }
+        }
+        else
+        {
+            static::export($objConfig, \Input::get('id'));
+        }
+    }
 
-			switch($objConfig->fileType)
-			{
-				case EXPORTER_FILE_TYPE_CSV:
-					$objExporter = new CsvExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_MEDIA:
-					$objExporter = new MediaExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_PDF:
-					$objExporter = new PdfExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_XLS:
-					$objExporter = new XlsExporter($objConfig);
-					break;
-			}
+    /**
+     * @param       $objConfig
+     * @param null  $objEntity
+     * @param array $arrFields
+     *
+     * @return bool|object The exporter or false if no exporter had been found (or error happened).
+     */
+    public static function export($objConfig, $objEntity = null, array $arrFields = array())
+    {
+        $objExporter = null;
 
-			if ($objExporter)
-				$objExporter->export($strExportType, $intId);
+        $objExporter = new $objConfig->exporterClass($objConfig);
 
-			die();
-		}
-	}
+        if ($objExporter)
+        {
+            $objExporter->export($objEntity, $arrFields);
 
-	public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
-	{
-		$arrOperation = array
-		(
-			'label'      => &$strLabel,
-			'href'       => 'exportType=list&key=' . $strName,
-			'class'      => 'header_' . $strName . '_entities',
-			'icon'       => $strIcon,
-			'attributes' => 'onclick="Backend.getScrollOffset()"'
-		);
+            return $objExporter;
+        }
 
-		return $arrOperation;
-	}
+        return false;
+    }
 
-	public static function getOperation($strName, $strLabel = '', $strIcon = '')
-	{
-		$arrOperation = array
-		(
-			'label'      => &$strLabel,
-			'href'       => 'exportType=item&key=' . $strName,
-			'icon'       => $strIcon,
-		);
+    public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
+    {
+        $arrOperation = array(
+            'label'      => &$strLabel,
+            'href'       => 'key=' . $strName,
+            'class'      => 'header_' . $strName . '_entities',
+            'icon'       => $strIcon,
+            'attributes' => 'onclick="Backend.getScrollOffset()"',
+        );
 
-		return $arrOperation;
-	}
+        return $arrOperation;
+    }
 
-	public static function getBackendModule()
-	{
-		return array('HeimrichHannot\Exporter\ModuleExporter', 'export');
-	}
+    public static function getOperation($strName, $strLabel = '', $strIcon = '')
+    {
+        $arrOperation = array(
+            'label' => &$strLabel,
+            'href'  => 'key=' . $strName,
+            'icon'  => $strIcon,
+        );
+
+        return $arrOperation;
+    }
+
+    public static function getBackendModule()
+    {
+        return array('HeimrichHannot\Exporter\ModuleExporter', 'exportBe');
+    }
 
 }

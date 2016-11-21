@@ -1,7 +1,0 @@
-<table width="100%">
-	<?php foreach ($this->arrFields as $varValue) : ?>
-		<tr nobr="true">
-			<td><?= $varValue ?></td>
-		</tr>
-	<?php endforeach ?>
-</table>
