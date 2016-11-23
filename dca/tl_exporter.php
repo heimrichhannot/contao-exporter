@@ -178,7 +178,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
             'filter'           => true,
             'inputType'        => 'select',
             'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
-            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'w50'),
+            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'),
             'sql'              => "blob NULL",
         ),
         'skipLabels'                => array(
@@ -187,7 +187,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
             'filter'           => true,
             'inputType'        => 'select',
             'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
-            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'w50'),
+            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'),
             'sql'              => "blob NULL",
         ),
         'addUnformattedFields'      => array(
