@@ -13,6 +13,7 @@ namespace HeimrichHannot\Exporter;
 
 use Contao\DC_Table;
 use HeimrichHannot\Haste\Dca\General;
+use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
 use HeimrichHannot\Haste\Util\FormSubmission;
 
@@ -39,9 +40,9 @@ abstract class PhpExcelExporter extends Exporter
     {
         switch ($this->type)
         {
-            case Exporter::TYPE_LIST:
-                break;
             case Exporter::TYPE_ITEM:
+                break;
+            case Exporter::TYPE_LIST:
                 $objDbResult = $this->getEntities();
                 $arrDca          = $GLOBALS['TL_DCA'][$this->linkedTable];
 
