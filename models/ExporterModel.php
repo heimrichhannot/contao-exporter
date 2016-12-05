@@ -14,16 +14,21 @@ namespace HeimrichHannot\Exporter;
 class ExporterModel extends \Model
 {
 
-	protected static $strTable = 'tl_exporter';
+    protected static $strTable = 'tl_exporter';
 
-	public static function findByKeyAndTable($strKey, $strTable, array $arrOptions=array())
-	{
-		$t = static::$strTable;
+    public static function findByKeyAndTable($strKey, $strTable, array $arrOptions = array())
+    {
+        $t = static::$strTable;
 
-		$arrColumns[] = "($t.globalOperationKey='" . $strKey . "')";
-		$arrColumns[] = "($t.linkedTable='" . $strTable . "')";
+        $arrColumns[] = "($t.globalOperationKey='" . $strKey . "')";
+        $arrColumns[] = "($t.linkedTable='" . $strTable . "')";
 
-		return static::findOneBy($arrColumns, null, $arrOptions);
-	}
+        if (TL_MODE == 'BE' && ($intPid = \Input::get('id')) && !\Input::get('act'))
+        {
+            $arrColumns[] = "($t.restrictToPids REGEXP '\"$intPid\"')";
+        }
+
+        return static::findOneBy($arrColumns, null, $arrOptions);
+    }
 
 }

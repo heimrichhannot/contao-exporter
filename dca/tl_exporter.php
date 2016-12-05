@@ -87,7 +87,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
         ),
         'default'                                    => '{title_legend},title,type;',
         \HeimrichHannot\Exporter\Exporter::TYPE_LIST => '{title_legend},title,type;' . '{export_legend},target,fileType;'
-                                                        . '{table_legend},globalOperationKey,linkedTable,addUnformattedFields,tableFieldsForExport,addJoinTables,whereClause,orderBy;',
+                                                        . '{table_legend},linkedTable,globalOperationKey,restrictToPids,addUnformattedFields,tableFieldsForExport,addJoinTables,whereClause,orderBy;',
         \HeimrichHannot\Exporter\Exporter::TYPE_ITEM => '{title_legend},title,type;' . '{export_legend},target,fileType;'
                                                         . '{table_legend},linkedTable,skipFields,skipLabels,addJoinTables,whereClause,orderBy;',
     ),
@@ -145,19 +145,6 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
         ),
 
         // table legend
-        'globalOperationKey'        => array(
-            'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['globalOperationKey'],
-            'exclude'          => true,
-            'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getGlobalOperationKeysAsOptions'),
-            'eval'             => array(
-                'mandatory'          => true,
-                'submitOnChange'     => true,
-                'includeBlankOption' => true,
-                'tl_class'           => 'w50',
-            ),
-            'sql'              => "varchar(255) NOT NULL default ''",
-        ),
         'linkedTable'               => array(
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['linkedTable'],
             'exclude'          => true,
@@ -171,6 +158,28 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
                 'tl_class'           => 'w50',
             ),
             'sql'              => "varchar(64) NOT NULL default ''",
+        ),
+        'globalOperationKey'        => array(
+            'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['globalOperationKey'],
+            'exclude'          => true,
+            'inputType'        => 'select',
+            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getGlobalOperationKeysAsOptions'),
+            'eval'             => array(
+                'mandatory'          => true,
+                'submitOnChange'     => true,
+                'includeBlankOption' => true,
+                'tl_class'           => 'w50',
+            ),
+            'sql'              => "varchar(255) NOT NULL default ''",
+        ),
+        'restrictToPids' => array(
+            'label'                   => &$GLOBALS['TL_LANG']['tl_exporter']['restrictToPids'],
+            'exclude'                 => true,
+            'filter'                  => true,
+            'inputType'               => 'select',
+            'options_callback' => array('\HeimrichHannot\Exporter\Backend', 'getTableArchives'),
+            'eval'                    => array('tl_class' => 'long clr', 'style' => 'width: 97%', 'chosen' => true, 'includeBlankOption' => true, 'multiple' => true),
+            'sql'                     => "blob NULL"
         ),
         'skipFields'                => array(
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['skipFields'],

@@ -200,4 +200,26 @@ class Backend extends \Controller
     {
         return Classes::getClassesInNamespace('HeimrichHannot\Exporter\Concrete');
     }
+
+    public static function getTableArchives(\DataContainer $objDc)
+    {
+        $arrOptions = array();
+
+        if ($objDc->activeRecord->linkedTable)
+        {
+            $objArchives = General::getTableArchives($objDc->activeRecord->linkedTable, array(
+                'order' => 'title ASC'
+            ));
+
+            if ($objArchives !== null)
+            {
+                while ($objArchives->next())
+                {
+                    $arrOptions[$objArchives->id] = $objArchives->title;
+                }
+            }
+        }
+
+        return $arrOptions;
+    }
 }

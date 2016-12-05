@@ -10,6 +10,7 @@ $arrLang['type'] = array('Typ', 'Wählen Sie hier, welcher Typ verwendet werden 
 
 // table legend
 $arrLang['globalOperationKey'] = array('Globale Operation', 'Wählen Sie hier die Operation aus, die den Export auslösen soll.');
+$arrLang['restrictToPids'] = array('Auf bestimmte Archive beschränken', 'Wählen Sie hier die Archive aus, für die dieser Exporter greifen soll.');
 $arrLang['linkedTable'] = array('Verknüpfte Tabelle', 'Wählen Sie hier die Tabelle aus, die exportiert werden soll.');
 $arrLang['tableFieldsForExport'] = array('Felder', 'Wählen Sie hier die Felder aus, die exportiert werden sollen.');
 $arrLang['localizeFields'] = array('Feldwerte lokalisieren', 'Wählen Sie diese Option, wenn die Feldwerte lokalisiert werden sollen.');
