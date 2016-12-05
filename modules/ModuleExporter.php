@@ -40,6 +40,11 @@ class ModuleExporter
     {
         $objExporter = null;
 
+        if (!$objConfig->exporterClass)
+        {
+            throw new \Exception('Missing exporter class for exporter config ID ' . $objConfig->id);
+        }
+
         $objExporter = new $objConfig->exporterClass($objConfig);
 
         if ($objExporter)
