@@ -70,12 +70,34 @@ abstract class PhpExcelExporter extends Exporter
                 while ($objDbResult->next())
                 {
                     $arrRow = $objDbResult->row();
+                    unset($arrRow['id']);
                     $intCol = 0;
                     foreach ($arrRow as $key => $varValue)
                     {
                         $objDc               = new \DC_Table($this->linkedTable);
                         $objDc->activeRecord = $objDbResult;
                         $objDc->id           = $objDbResult->id;
+
+                        // trigger onload_callback since these could modify the dca
+                        if (is_array($arrDca['config']['onload_callback']))
+                        {
+                            foreach ($arrDca['config']['onload_callback'] as $callback)
+                            {
+                                if (is_array($callback))
+                                {
+                                    $this->import($callback[0]);
+                                    $this->{$callback[0]}->{$callback[1]}($objDc);
+                                }
+                                elseif (is_callable($callback))
+                                {
+                                    $callback($objDc);
+                                }
+                            }
+
+                            // refresh
+                            $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
+                        }
+
                         $varValue            = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
                             $varValue,
                             $arrDca['fields'][$key],

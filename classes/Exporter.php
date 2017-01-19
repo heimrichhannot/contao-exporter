@@ -129,7 +129,7 @@ abstract class Exporter extends \Controller
 
         if ($this->fileNameAddDatime)
         {
-            $strFilename = date($this->fileNameAddDatimeFormat ?: \Config::get('datimFormat')) . '_' . $strFilename;
+            $strFilename = date($this->fileNameAddDatimeFormat ?: 'Y-m-d') . '_' . $strFilename;
         }
 
         if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyFilename']))
@@ -214,7 +214,7 @@ abstract class Exporter extends \Controller
         }
 
         // SELECT
-        $strQuery = 'SELECT ' . implode(',', $arrExportFields) . ' FROM ' . $this->linkedTable;
+        $strQuery = 'SELECT id,' . implode(',', $arrExportFields) . ' FROM ' . $this->linkedTable;
 
         // JOIN
         if ($this->addJoinTables)
