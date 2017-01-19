@@ -12,6 +12,7 @@
 namespace HeimrichHannot\Exporter;
 
 use Contao\DC_Table;
+use HeimrichHannot\Haste\Dca\DC_HastePlus;
 use HeimrichHannot\Haste\Dca\General;
 use HeimrichHannot\Haste\Util\Arrays;
 use HeimrichHannot\Haste\Util\Files;
@@ -19,8 +20,8 @@ use HeimrichHannot\Haste\Util\FormSubmission;
 
 abstract class PhpExcelExporter extends Exporter
 {
-    protected $arrHeaderFields = array();
-    protected $arrExportFields = array();
+    protected $arrHeaderFields = [];
+    protected $arrExportFields = [];
 
     public function __construct($objConfig)
     {
@@ -29,14 +30,14 @@ abstract class PhpExcelExporter extends Exporter
         $this->objPhpExcel = new \PHPExcel();
     }
 
-    public function export($objEntity = null, array $arrFields = array())
+    public function export($objEntity = null, array $arrFields = [])
     {
         $this->setHeaderFields();
 
         parent::export($objEntity, $arrFields);
     }
 
-    protected function doExport($objEntity = null, array $arrFields = array())
+    protected function doExport($objEntity = null, array $arrFields = [])
     {
         switch ($this->type)
         {
@@ -67,37 +68,44 @@ abstract class PhpExcelExporter extends Exporter
                 }
 
                 // body
+
                 while ($objDbResult->next())
                 {
                     $arrRow = $objDbResult->row();
                     unset($arrRow['id']);
                     $intCol = 0;
-                    foreach ($arrRow as $key => $varValue)
+
+                    $objDc               = new DC_HastePlus($this->linkedTable);
+                    $objDc->activeRecord = $objDbResult;
+                    $objDc->id           = $objDbResult->id;
+
+                    // trigger onload_callback since these could modify the dca
+                    if (is_array($arrDca['config']['onload_callback']))
                     {
-                        $objDc               = new \DC_Table($this->linkedTable);
-                        $objDc->activeRecord = $objDbResult;
-                        $objDc->id           = $objDbResult->id;
-
-                        // trigger onload_callback since these could modify the dca
-                        if (is_array($arrDca['config']['onload_callback']))
+                        foreach ($arrDca['config']['onload_callback'] as $callback)
                         {
-                            foreach ($arrDca['config']['onload_callback'] as $callback)
+                            if (is_array($callback))
                             {
-                                if (is_array($callback))
+                                if (!isset($arrOnload[implode(',', $callback)]))
                                 {
-                                    $this->import($callback[0]);
-                                    $this->{$callback[0]}->{$callback[1]}($objDc);
+                                    $arrOnload[implode(',', $callback)] = 0;
                                 }
-                                elseif (is_callable($callback))
-                                {
-                                    $callback($objDc);
-                                }
-                            }
 
-                            // refresh
-                            $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
+                                $this->import($callback[0]);
+                                $this->{$callback[0]}->{$callback[1]}($objDc);
+                            }
+                            elseif (is_callable($callback))
+                            {
+                                $callback($objDc);
+                            }
                         }
 
+                        // refresh
+                        $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
+                    }
+
+                    foreach ($arrRow as $key => $varValue)
+                    {
                         $varValue            = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
                             $varValue,
                             $arrDca['fields'][$key],
@@ -118,6 +126,7 @@ abstract class PhpExcelExporter extends Exporter
 
                         $this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
                         $this->processBodyRow($intCol);
+
                         $intCol++;
                     }
                     $this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);

@@ -1,8 +1,8 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [1.6.20] - 2017-01-18
+## [3.0.7] - 2017-01-18
 
 ### Fixed
-- missing onload_callbacks
-- date in file name format bug
+- tweaked performance
+- replaced array() by []

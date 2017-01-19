@@ -20,7 +20,7 @@ class MediaExporter
 	{
 		$strTmpFile = 'system/tmp/' . $this->strFilename;
 		$strTmpFolder = str_replace('.' . $this->compressionType, '', $strTmpFile);
-		$arrExportFields = array();
+		$arrExportFields = [];
 		$arrDca = $GLOBALS['TL_DCA'][$this->linkedTable]['fields'];
 		foreach (deserialize($this->tableFieldsForExport, true) as $strField)
 		{
@@ -52,7 +52,7 @@ class MediaExporter
 
 				$varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc);
 				if (!is_array($varValue))
-					$varValue = array($varValue);
+					$varValue = [$varValue];
 				foreach ($varValue as $strPath)
 				{
 					if ($strPath && ($objFile = new \File($strPath, true)) !== null && $objFile->exists())

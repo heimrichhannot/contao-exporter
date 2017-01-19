@@ -141,33 +141,29 @@ class ModuleFrontendExporter extends \Module
 
 	public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
 	{
-		$arrOperation = array
-		(
+		$arrOperation = [
 			'label'      => &$strLabel,
 			'href'       => 'exportType=list&key=' . $strName,
 			'class'      => 'header_' . $strName . '_entities',
 			'icon'       => $strIcon,
-			'attributes' => 'onclick="Backend.getScrollOffset()"'
-		);
+			'attributes' => 'onclick="Backend.getScrollOffset()"'];
 
 		return $arrOperation;
 	}
 
 	public static function getOperation($strName, $strLabel = '', $strIcon = '')
 	{
-		$arrOperation = array
-		(
+		$arrOperation = [
 			'label'      => &$strLabel,
 			'href'       => 'exportType=item&key=' . $strName,
-			'icon'       => $strIcon,
-		);
+			'icon'       => $strIcon,];
 
 		return $arrOperation;
 	}
 
 	public static function getBackendModule()
 	{
-		return array('HeimrichHannot\Exporter\ModuleExporter', 'export');
+		return ['HeimrichHannot\Exporter\ModuleExporter', 'export'];
 	}
 
 }

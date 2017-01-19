@@ -35,7 +35,7 @@ abstract class Exporter extends \Controller
     public function __construct($objConfig)
     {
         $this->objConfig = $objConfig;
-        $arrSkipFields   = array('id', 'tstamp', 'title');
+        $arrSkipFields   = ['id', 'tstamp', 'title'];
 
         // add all config attributes to the scope of this class
         foreach ($objConfig->row() as $strField => $varValue)
@@ -52,7 +52,7 @@ abstract class Exporter extends \Controller
         \System::loadLanguageFile($this->linkedTable);
     }
 
-    public function export($objEntity = null, array $arrFields = array())
+    public function export($objEntity = null, array $arrFields = [])
     {
         if (!$this->strFilename)
         {
@@ -153,7 +153,7 @@ abstract class Exporter extends \Controller
             return;
         }
 
-        $arrFields = array();
+        $arrFields = [];
 
         foreach (deserialize($this->tableFieldsForExport, true) as $strField)
         {
@@ -198,7 +198,7 @@ abstract class Exporter extends \Controller
 
     protected function getEntities()
     {
-        $arrExportFields = array();
+        $arrExportFields = [];
         $arrDca          = $GLOBALS['TL_DCA'][$this->linkedTable];
 
         foreach (deserialize($this->tableFieldsForExport, true) as $strField)
@@ -228,7 +228,7 @@ abstract class Exporter extends \Controller
         }
 
         // WHERE
-        $arrWheres = array();
+        $arrWheres = [];
         if ($this->whereClause)
         {
             $arrWheres[] = html_entity_decode($this->whereClause);
@@ -269,7 +269,7 @@ abstract class Exporter extends \Controller
         return \Database::getInstance()->prepare($strQuery)->execute();
     }
 
-    protected abstract function doExport($objEntity = null, array $arrFields = array());
+    protected abstract function doExport($objEntity = null, array $arrFields = []);
 
     public abstract function exportToDownload($objResult);
 

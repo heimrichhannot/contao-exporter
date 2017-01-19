@@ -16,7 +16,7 @@ class ExporterModel extends \Model
 
     protected static $strTable = 'tl_exporter';
 
-    public static function findByKeyAndTable($strKey, $strTable, array $arrOptions = array())
+    public static function findByKeyAndTable($strKey, $strTable, array $arrOptions = [])
     {
         $t = static::$strTable;
 

@@ -18,7 +18,7 @@ use HeimrichHannot\Haste\Util\Files;
 
 class PdfExporter extends Exporter
 {
-    protected function doExport($objEntity = null, array $arrFields = array())
+    protected function doExport($objEntity = null, array $arrFields = [])
     {
         switch ($this->type)
         {

@@ -16,11 +16,11 @@ define('EXPORTER_FRONTEND_FORMID', 'exporter_download');
  * Frontend modules
  */
 array_insert(
-	$GLOBALS['FE_MOD'], count($GLOBALS['FE_MOD']) - 1, array(
-		'exporter' => array(
+	$GLOBALS['FE_MOD'], count($GLOBALS['FE_MOD']) - 1, [
+		'exporter' => [
 			'frontendExporter' => 'HeimrichHannot\Exporter\ModuleFrontendExporter'
-		)
-	)
+        ]
+                      ]
 );
 
 
@@ -29,15 +29,12 @@ array_insert(
  */
 array_insert(
 	$GLOBALS['BE_MOD']['devtools'],
-	1,
-	array
-	(
-		'exporter' => array
-		(
-			'tables' => array('tl_exporter'),
-			'icon'   => 'system/modules/exporter/assets/img/icon_export.png',
-		)
-	)
+    1,
+    [
+		'exporter' => [
+            'tables' => ['tl_exporter'],
+            'icon'   => 'system/modules/exporter/assets/img/icon_export.png',]
+    ]
 );
 
 /**

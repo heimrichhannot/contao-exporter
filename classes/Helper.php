@@ -45,12 +45,12 @@ class Helper
             return $objJoinTables->fetchEach('joinTable');
         }
 
-        return array();
+        return [];
     }
 
     public static function getJoinTablesAndConditions($intExporter)
     {
-        $arrTables = array();
+        $arrTables = [];
 
         $objJoins = \HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByPidAndTableAndField(
             $intExporter,
@@ -60,10 +60,10 @@ class Helper
 
         while ($objJoins->next())
         {
-            $arrTables[] = array(
+            $arrTables[] = [
                 'table'     => $objJoins->joinTable,
                 'condition' => $objJoins->joinCondition,
-            );
+            ];
         }
 
         return $arrTables;

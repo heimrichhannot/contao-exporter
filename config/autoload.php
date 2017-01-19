@@ -3,7 +3,7 @@
 /**
  * Contao Open Source CMS
  *
- * Copyright (c) 2005-2016 Leo Feyer
+ * Copyright (c) 2005-2017 Leo Feyer
  *
  * @license LGPL-3.0+
  */
@@ -12,17 +12,17 @@
 /**
  * Register the namespaces
  */
-ClassLoader::addNamespaces(array
-(
-	'HeimrichHannot',
-));
+ClassLoader::addNamespaces(
+    [
+	'HeimrichHannot',]
+);
 
 
 /**
  * Register the classes
  */
-ClassLoader::addClasses(array
-(
+ClassLoader::addClasses(
+    [
 	// Modules
 	'HeimrichHannot\Exporter\ModuleFrontendExporter' => 'system/modules/exporter/modules/ModuleFrontendExporter.php',
 	'HeimrichHannot\Exporter\ModuleExporter'         => 'system/modules/exporter/modules/ModuleExporter.php',
@@ -38,15 +38,15 @@ ClassLoader::addClasses(array
 	'HeimrichHannot\Exporter\Helper'                 => 'system/modules/exporter/classes/Helper.php',
 
 	// Models
-	'HeimrichHannot\Exporter\ExporterModel'          => 'system/modules/exporter/models/ExporterModel.php',
-));
+	'HeimrichHannot\Exporter\ExporterModel'          => 'system/modules/exporter/models/ExporterModel.php',]
+);
 
 
 /**
  * Register the templates
  */
-TemplateLoader::addFiles(array
-(
+TemplateLoader::addFiles(
+    [
 	'mod_frontend_export'       => 'system/modules/exporter/templates/modules',
-	'exporter_pdf_item_default' => 'system/modules/exporter/templates',
-));
+	'exporter_pdf_item_default' => 'system/modules/exporter/templates',]
+);

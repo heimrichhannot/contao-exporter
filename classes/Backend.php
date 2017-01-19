@@ -29,12 +29,12 @@ class Backend extends \Controller
 
     public static function doGetTableFields($strTable, $blnIncludeUnformatted = false, $blnPrefixTableName = false)
     {
-        $arrOptions        = array();
+        $arrOptions        = [];
         $strTableName      = $strTable;
 
         if (!$strTable)
         {
-            return array();
+            return [];
         }
 
         \Controller::loadDataContainer($strTable);
@@ -86,7 +86,7 @@ class Backend extends \Controller
      */
     public static function getLinkedTablesAsOptions(\DataContainer $objDc)
     {
-        $arrTables             = array();
+        $arrTables             = [];
         $strGlobalOperationKey = $objDc->activeRecord->globalOperationKey;
 
         switch ($objDc->activeRecord->type)
@@ -133,8 +133,8 @@ class Backend extends \Controller
      */
     public static function getGlobalOperationKeysAsOptions()
     {
-        $arrGlobalOperations = array();
-        $arrSkipKeys         = array('callback', 'generate', 'icon', 'import', 'javascript', 'stylesheet', 'table', 'tables');
+        $arrGlobalOperations = [];
+        $arrSkipKeys         = ['callback', 'generate', 'icon', 'import', 'javascript', 'stylesheet', 'table', 'tables'];
 
         foreach ($GLOBALS['BE_MOD'] as $arrSection)
         {
@@ -166,7 +166,7 @@ class Backend extends \Controller
 
     public static function getConfigsAsOptions($strType = null)
     {
-        $arrOptions = array();
+        $arrOptions = [];
         if ($strType)
         {
             $objConfigs = ExporterModel::findByType($strType);
@@ -203,13 +203,14 @@ class Backend extends \Controller
 
     public static function getTableArchives(\DataContainer $objDc)
     {
-        $arrOptions = array();
+        $arrOptions = [];
 
         if ($objDc->activeRecord->linkedTable)
         {
-            $objArchives = General::getTableArchives($objDc->activeRecord->linkedTable, array(
+            $objArchives = General::getTableArchives($objDc->activeRecord->linkedTable, [
                 'order' => 'title ASC'
-            ));
+            ]
+            );
 
             if ($objArchives !== null)
             {

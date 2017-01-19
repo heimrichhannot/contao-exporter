@@ -36,7 +36,7 @@ class ModuleExporter
      *
      * @return bool|object The exporter or false if no exporter had been found (or error happened).
      */
-    public static function export($objConfig, $objEntity = null, array $arrFields = array())
+    public static function export($objConfig, $objEntity = null, array $arrFields = [])
     {
         $objExporter = null;
 
@@ -59,31 +59,31 @@ class ModuleExporter
 
     public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
     {
-        $arrOperation = array(
+        $arrOperation = [
             'label'      => &$strLabel,
             'href'       => 'key=' . $strName,
             'class'      => 'header_' . $strName . '_entities',
             'icon'       => $strIcon,
             'attributes' => 'onclick="Backend.getScrollOffset()"',
-        );
+        ];
 
         return $arrOperation;
     }
 
     public static function getOperation($strName, $strLabel = '', $strIcon = '')
     {
-        $arrOperation = array(
+        $arrOperation = [
             'label' => &$strLabel,
             'href'  => 'key=' . $strName,
             'icon'  => $strIcon,
-        );
+        ];
 
         return $arrOperation;
     }
 
     public static function getBackendModule()
     {
-        return array('HeimrichHannot\Exporter\ModuleExporter', 'exportBe');
+        return ['HeimrichHannot\Exporter\ModuleExporter', 'exportBe'];
     }
 
 }

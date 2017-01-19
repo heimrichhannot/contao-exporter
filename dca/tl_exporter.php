@@ -12,71 +12,71 @@
 /**
  * Table tl_exporter
  */
-$GLOBALS['TL_DCA']['tl_exporter'] = array(
+$GLOBALS['TL_DCA']['tl_exporter'] = [
 
     // Config
-    'config'      => array(
+    'config'      => [
         'dataContainer'    => 'Table',
         'enableVersioning' => true,
-        'onload_callback'  => array(
-            array('tl_exporter', 'checkPermission'),
-        ),
-        'sql'              => array(
-            'keys' => array(
+        'onload_callback'  => [
+            ['tl_exporter', 'checkPermission'],
+        ],
+        'sql'              => [
+            'keys' => [
                 'id' => 'primary',
-            ),
-        ),
+            ],
+        ],
 
-    ),
+    ],
 
     // List
-    'list'        => array(
-        'sorting'           => array(
+    'list'        => [
+        'sorting'           => [
             'mode'        => 1,
             'flag'        => 11,
             'panelLayout' => 'filter;search,limit',
-            'fields'      => array('fileType'),
-        ),
-        'label'             => array(
-            'fields' => array('title'),
+            'fields'      => ['fileType'],
+        ],
+        'label'             => [
+            'fields' => ['title'],
             'format' => '%s',
-        ),
-        'global_operations' => array(
-            'all' => array(
+        ],
+        'global_operations' => [
+            'all' => [
                 'label'      => &$GLOBALS['TL_LANG']['MSC']['all'],
                 'href'       => 'act=select',
                 'class'      => 'header_edit_all',
                 'attributes' => 'onclick="Backend.getScrollOffset();" accesskey="e"',
-            ),
-        ),
-        'operations'        => array(
-            'edit'   => array(
+            ],
+        ],
+        'operations'        => [
+            'edit'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_exporter']['edit'],
                 'href'  => 'act=edit',
                 'icon'  => 'edit.gif',
-            ),
-            'copy'   => array(
+            ],
+            'copy'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_exporter']['copy'],
                 'href'  => 'act=copy',
                 'icon'  => 'copy.gif',
-            ),
-            'delete' => array(
+            ],
+            'delete' => [
                 'label'      => &$GLOBALS['TL_LANG']['tl_exporter']['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
                 'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"',
-            ),
-            'show'   => array(
+            ],
+            'show'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_exporter']['show'],
                 'href'  => 'act=show',
                 'icon'  => 'show.gif',
-            ),
-        ),
-    ),
+            ],
+        ],
+    ],
 
     // Palettes
-    'palettes'    => array(
-        '__selector__'                               => array(
+    'palettes'    => [
+        '__selector__'                               => [
             'fileType',
             'addHeaderToExportTable',
             'overrideHeaderFieldLabels',
@@ -84,16 +84,16 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
             'type',
             'target',
             'fileNameAddDatime',
-        ),
+        ],
         'default'                                    => '{title_legend},title,type;',
         \HeimrichHannot\Exporter\Exporter::TYPE_LIST => '{title_legend},title,type;' . '{export_legend},target,fileType;'
                                                         . '{table_legend},globalOperationKey,linkedTable,restrictToPids,addUnformattedFields,tableFieldsForExport,addJoinTables,whereClause,orderBy;',
         \HeimrichHannot\Exporter\Exporter::TYPE_ITEM => '{title_legend},title,type;' . '{export_legend},target,fileType;'
                                                         . '{table_legend},linkedTable,skipFields,skipLabels,addJoinTables,whereClause,orderBy;',
-    ),
+    ],
 
     // Subpalettes
-    'subpalettes' => array(
+    'subpalettes' => [
         'fileType_csv'                                                 => 'exporterClass,fieldDelimiter,fieldEnclosure,localizeFields,addHeaderToExportTable',
         'fileType_pdf'                                                 => 'exporterClass,pdfBackground,pdfFonts,pdfMargins,pdfTitle,pdfSubject,pdfCreator,localizeFields,pdfCss,pdfTemplate',
         'fileType_xls'                                                 => 'exporterClass,localizeFields,addHeaderToExportTable',
@@ -104,152 +104,152 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
         'target_' . \HeimrichHannot\Exporter\Exporter::TARGET_DOWNLOAD => 'fileName,fileNameAddDatime',
         'target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE     => 'fileDir,useHomeDir,fileSubDirName,fileName,fileNameAddDatime',
         'fileNameAddDatime'                                            => 'fileNameAddDatimeFormat',
-    ),
+    ],
 
     // Fields
-    'fields'      => array(
-        'id'                        => array(
+    'fields'      => [
+        'id'                        => [
             'sql' => "int(10) unsigned NOT NULL auto_increment",
-        ),
-        'tstamp'                    => array(
+        ],
+        'tstamp'                    => [
             'sql' => "int(10) unsigned NOT NULL default '0'",
-        ),
-        'title'                     => array(
+        ],
+        'title'                     => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['title'],
             'exclude'   => true,
             'search'    => true,
             'sorting'   => true,
             'flag'      => 1,
             'inputType' => 'text',
-            'eval'      => array(
+            'eval'      => [
                 'tl_class'  => 'w50',
                 'mandatory' => true,
                 'maxlength' => 255,
-            ),
+            ],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'type'                      => array(
+        ],
+        'type'                      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['type'],
             'inputType' => 'select',
-            'options'   => array(
+            'options'   => [
                 \HeimrichHannot\Exporter\Exporter::TYPE_LIST,
                 \HeimrichHannot\Exporter\Exporter::TYPE_ITEM,
-            ),
+            ],
             'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['reference'],
-            'eval'      => array(
+            'eval'      => [
                 'mandatory'      => true,
                 'tl_class'       => 'w50',
                 'submitOnChange' => true,
-            ),
+            ],
             'sql'       => "varchar(16) NOT NULL default 'list'",
-        ),
+        ],
 
         // table legend
-        'linkedTable'               => array(
+        'linkedTable'               => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['linkedTable'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getLinkedTablesAsOptions'),
-            'eval'             => array(
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getLinkedTablesAsOptions'],
+            'eval'             => [
                 'chosen'             => true,
                 'mandatory'          => true,
                 'submitOnChange'     => true,
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
-            ),
+            ],
             'sql'              => "varchar(64) NOT NULL default ''",
-        ),
-        'globalOperationKey'        => array(
+        ],
+        'globalOperationKey'        => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['globalOperationKey'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getGlobalOperationKeysAsOptions'),
-            'eval'             => array(
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getGlobalOperationKeysAsOptions'],
+            'eval'             => [
                 'mandatory'          => true,
                 'submitOnChange'     => true,
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
-            ),
+            ],
             'sql'              => "varchar(255) NOT NULL default ''",
-        ),
-        'restrictToPids' => array(
+        ],
+        'restrictToPids' => [
             'label'                   => &$GLOBALS['TL_LANG']['tl_exporter']['restrictToPids'],
             'exclude'                 => true,
             'filter'                  => true,
             'inputType'               => 'select',
-            'options_callback' => array('\HeimrichHannot\Exporter\Backend', 'getTableArchives'),
-            'eval'                    => array('tl_class' => 'long clr', 'style' => 'width: 97%', 'chosen' => true, 'includeBlankOption' => true, 'multiple' => true),
+            'options_callback' => ['\HeimrichHannot\Exporter\Backend', 'getTableArchives'],
+            'eval'                    => ['tl_class' => 'long clr', 'style' => 'width: 97%', 'chosen' => true, 'includeBlankOption' => true, 'multiple' => true],
             'sql'                     => "blob NULL"
-        ),
-        'skipFields'                => array(
+        ],
+        'skipFields'                => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['skipFields'],
             'exclude'          => true,
             'filter'           => true,
             'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
-            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'),
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
+            'eval'             => ['multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'],
             'sql'              => "blob NULL",
-        ),
-        'skipLabels'                => array(
+        ],
+        'skipLabels'                => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['skipLabels'],
             'exclude'          => true,
             'filter'           => true,
             'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
-            'eval'             => array('multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'),
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
+            'eval'             => ['multiple' => true, 'chosen' => true, 'tl_class' => 'long', 'style' => 'width: 97%'],
             'sql'              => "blob NULL",
-        ),
-        'addUnformattedFields'      => array(
+        ],
+        'addUnformattedFields'      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['addUnformattedFields'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array(
+            'eval'      => [
                 'submitOnChange' => true,
                 'tl_class'       => 'w50 clr',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'tableFieldsForExport'      => array(
+        ],
+        'tableFieldsForExport'      => [
             'inputType'        => 'checkboxWizard',
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['tableFieldsForExport'],
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
             'exclude'          => true,
-            'eval'             => array(
+            'eval'             => [
                 'multiple'  => true,
                 'tl_class'  => 'w50 autoheight clr',
                 'mandatory' => true,
-            ),
+            ],
             'sql'              => "blob NULL",
-        ),
+        ],
 
         // export legend
-        'fileType'                  => array(
+        'fileType'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => array(
+            'options'   => [
                 EXPORTER_FILE_TYPE_CSV,
                 EXPORTER_FILE_TYPE_PDF,
                 EXPORTER_FILE_TYPE_XLS,
                 EXPORTER_FILE_TYPE_MEDIA,
-            ),
+            ],
             'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['fileType'],
-            'eval'      => array(
+            'eval'      => [
                 'mandatory'          => true,
                 'includeBlankOption' => true,
                 'submitOnChange'     => true,
                 'tl_class'           => 'w50 clr',
-            ),
+            ],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'exporterClass'             => array(
+        ],
+        'exporterClass'             => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['exporterClass'],
             'inputType'        => 'select',
-            'eval'             => array('mandatory' => true, 'tl_class' => 'w50', 'decodeEntities' => true),
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getExporterClasses'),
+            'eval'             => ['mandatory' => true, 'tl_class' => 'w50', 'decodeEntities' => true],
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getExporterClasses'],
             'sql'              => "varchar(255) NOT NULL default ''",
-        ),
-        'fieldDelimiter'            => array(
+        ],
+        'fieldDelimiter'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fieldDelimiter'],
             'exclude'   => true,
             'search'    => true,
@@ -257,14 +257,14 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
             'flag'      => 1,
             'inputType' => 'text',
             'default'   => ',',
-            'eval'      => array(
+            'eval'      => [
                 'mandatory' => true,
                 'maxlength' => 1,
                 'tl_class'  => 'w50 clr',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'fieldEnclosure'            => array(
+        ],
+        'fieldEnclosure'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fieldEnclosure'],
             'exclude'   => true,
             'search'    => true,
@@ -272,333 +272,333 @@ $GLOBALS['TL_DCA']['tl_exporter'] = array(
             'flag'      => 1,
             'inputType' => 'text',
             'default'   => '"',
-            'eval'      => array(
+            'eval'      => [
                 'mandatory' => true,
                 'maxlength' => 1,
                 'tl_class'  => 'w50',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'addHeaderToExportTable'    => array(
+        ],
+        'addHeaderToExportTable'    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['addHeaderToExportTable'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array(
+            'eval'      => [
                 'submitOnChange' => true,
                 'tl_class'       => 'w50 clr',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'overrideHeaderFieldLabels' => array(
+        ],
+        'overrideHeaderFieldLabels' => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['overrideHeaderFieldLabels'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array(
+            'eval'      => [
                 'submitOnChange' => true,
                 'tl_class'       => 'w50 clr',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'headerFieldLabels'         => array(
+        ],
+        'headerFieldLabels'         => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels'],
             'exclude'   => true,
             'inputType' => 'multiColumnWizard',
-            'eval'      => array(
+            'eval'      => [
                 'tl_class'     => 'clr',
-                'columnFields' => array(
-                    'field' => array(
+                'columnFields' => [
+                    'field' => [
                         'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['field'],
                         'exclude'          => true,
-                        'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getTableFields'),
+                        'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
                         'inputType'        => 'select',
-                        'eval'             => array('style' => 'width: 250px'),
-                    ),
-                    'label' => array(
+                        'eval'             => ['style' => 'width: 250px'],
+                    ],
+                    'label' => [
                         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['label'],
                         'exclude'   => true,
                         'inputType' => 'text',
-                        'eval'      => array('style' => 'width: 250px'),
-                    ),
-                ),
-            ),
+                        'eval'      => ['style' => 'width: 250px'],
+                    ],
+                ],
+            ],
             'sql'       => "blob NULL",
-        ),
-        'compressionType'           => array(
+        ],
+        'compressionType'           => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['compressionType'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => array('zip'),
+            'options'   => ['zip'],
             'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['compressionType'],
-            'eval'      => array(
+            'eval'      => [
                 'mandatory' => true,
                 'tl_class'  => 'w50',
-            ),
+            ],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'localizeHeader'            => array(
+        ],
+        'localizeHeader'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['localizeHeader'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array(
+            'eval'      => [
                 'tl_class' => 'w50',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'localizeFields'            => array(
+        ],
+        'localizeFields'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['localizeFields'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array(
+            'eval'      => [
                 'tl_class' => 'w50 clr',
-            ),
+            ],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'target'                    => array(
+        ],
+        'target'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['target'],
             'exclude'   => true,
             'inputType' => 'select',
-            'options'   => array(
+            'options'   => [
                 \HeimrichHannot\Exporter\Exporter::TARGET_DOWNLOAD,
                 \HeimrichHannot\Exporter\Exporter::TARGET_FILE,
-            ),
+            ],
             'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['reference'],
-            'eval'      => array(
+            'eval'      => [
                 'submitOnChange'     => true,
                 'mandatory'          => true,
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
-            ),
+            ],
             'sql'       => "varchar(255) NOT NULL default '" . \HeimrichHannot\Exporter\Exporter::TARGET_DOWNLOAD . "'",
-        ),
-        'fileDir'                   => array(
+        ],
+        'fileDir'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileDir'],
             'exclude'   => true,
             'inputType' => 'fileTree',
-            'eval'      => array('fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr'),
+            'eval'      => ['fieldType' => 'radio', 'mandatory' => true, 'tl_class' => 'w50 clr'],
             'sql'       => "binary(16) NULL",
-        ),
-        'useHomeDir'                => array(
+        ],
+        'useHomeDir'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['useHomeDir'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array('tl_class' => 'w50'),
+            'eval'      => ['tl_class' => 'w50'],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'fileSubDirName'                  => array(
+        ],
+        'fileSubDirName'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileSubDirName'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 255, 'tl_class' => 'w50'),
+            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'fileName'                  => array(
+        ],
+        'fileName'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileName'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 255, 'tl_class' => 'w50'),
+            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'fileNameAddDatime'         => array(
+        ],
+        'fileNameAddDatime'         => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileNameAddDatime'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array('submitOnChange' => true, 'tl_class' => 'w50 clr'),
+            'eval'      => ['submitOnChange' => true, 'tl_class' => 'w50 clr'],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'fileNameAddDatimeFormat'   => array(
+        ],
+        'fileNameAddDatimeFormat'   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileNameAddDatimeFormat'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 255, 'tl_class' => 'w50'),
+            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'addJoinTables'             => array(
+        ],
+        'addJoinTables'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['addJoinTables'],
             'exclude'   => true,
             'inputType' => 'checkbox',
-            'eval'      => array('submitOnChange' => true, 'tl_class' => 'clr'),
+            'eval'      => ['submitOnChange' => true, 'tl_class' => 'clr'],
             'sql'       => "char(1) NOT NULL default ''",
-        ),
-        'joinTables'                => array(
+        ],
+        'joinTables'                => [
             'label'        => &$GLOBALS['TL_LANG']['tl_exporter']['joinTables'],
             'inputType'    => 'fieldpalette',
             'foreignKey'   => 'tl_fieldpalette.id',
-            'relation'     => array('type' => 'hasMany', 'load' => 'eager'),
+            'relation'     => ['type' => 'hasMany', 'load' => 'eager'],
             'sql'          => "blob NULL",
-            'fieldpalette' => array(
-                'config'   => array(
+            'fieldpalette' => [
+                'config'   => [
                     'hidePublished' => true,
-                ),
-                'list'     => array(
-                    'label' => array(
-                        'fields' => array('joinTable', 'joinCondition'),
+                ],
+                'list'     => [
+                    'label' => [
+                        'fields' => ['joinTable', 'joinCondition'],
                         'format' => '%s <span style="color:#b3b3b3;padding-left:3px">[%s]</span>',
-                    ),
-                ),
-                'palettes' => array(
+                    ],
+                ],
+                'palettes' => [
                     'default' => 'joinTable,joinCondition',
-                ),
-                'fields'   => array(
-                    'joinTable'     => array(
+                ],
+                'fields'   => [
+                    'joinTable'     => [
                         'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['joinTable'],
                         'exclude'          => true,
                         'inputType'        => 'select',
-                        'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getAllTablesAsOptions'),
-                        'eval'             => array(
+                        'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getAllTablesAsOptions'],
+                        'eval'             => [
                             'includeBlankOption' => true,
-                        ),
+                        ],
                         'sql'              => "varchar(255) NOT NULL default ''",
-                    ),
-                    'joinCondition' => array(
+                    ],
+                    'joinCondition' => [
                         'label'       => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
                         'sorting'     => true,
                         'inputType'   => 'text',
                         'exclude'     => true,
-                        'eval'        => array('class' => 'long', 'decodeEntities' => true),
+                        'eval'        => ['class' => 'long', 'decodeEntities' => true],
                         'explanation' => 'insertTags',
                         'sql'         => "varchar(255) NOT NULL default ''",
-                    ),
-                ),
-            ),
-        ),
-        'whereClause'               => array(
+                    ],
+                ],
+            ],
+        ],
+        'whereClause'               => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['whereClause'],
             'exclude'   => true,
             'inputType' => 'text',
-            'eval'      => array('tl_class' => 'w50 clr', 'decodeEntities' => true),
+            'eval'      => ['tl_class' => 'w50 clr', 'decodeEntities' => true],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'orderBy'                   => array(
+        ],
+        'orderBy'                   => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['orderBy'],
             'exclude'   => true,
             'inputType' => 'text',
-            'eval'      => array('tl_class' => 'w50 clr', 'decodeEntities' => true),
+            'eval'      => ['tl_class' => 'w50 clr', 'decodeEntities' => true],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'pdfBackground'             => array(
+        ],
+        'pdfBackground'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfBackground'],
             'inputType' => 'fileTree',
             'exclude'   => true,
-            'eval'      => array(
+            'eval'      => [
                 'filesOnly'  => true,
                 'extensions' => 'pdf',
                 'fieldType'  => 'radio',
                 'tl_class'   => 'w50',
-            ),
+            ],
             'sql'       => "binary(16) NULL",
-        ),
-        'pdfTemplate'               => array(
+        ],
+        'pdfTemplate'               => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['pdfTemplate'],
             'exclude'          => true,
             'inputType'        => 'select',
-            'options_callback' => array('HeimrichHannot\Exporter\Backend', 'getPdfExporterTemplates'),
-            'eval'             => array(
+            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getPdfExporterTemplates'],
+            'eval'             => [
                 'tl_class'           => 'w50 clr',
                 'includeBlankOption' => true,
-            ),
+            ],
             'sql'              => "varchar(128) NOT NULL default ''",
-        ),
-        'pdfCss'                    => array(
+        ],
+        'pdfCss'                    => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfCss'],
             'inputType' => 'fileTree',
             'exclude'   => true,
-            'eval'      => array(
+            'eval'      => [
                 'filesOnly'  => true,
                 'extensions' => 'css',
                 'fieldType'  => 'checkbox',
                 'tl_class'   => 'w50',
-            ),
+            ],
             'sql'       => "blob NULL",
-        ),
-        'pdfFonts'                  => array(
+        ],
+        'pdfFonts'                  => [
             'label'        => &$GLOBALS['TL_LANG']['tl_exporter']['pdfFonts'],
             'exclude'      => true,
             'inputType'    => 'fieldpalette',
             'foreignKey'   => 'tl_fieldpalette.id',
-            'relation'     => array('type' => 'hasMany', 'load' => 'eager'),
+            'relation'     => ['type' => 'hasMany', 'load' => 'eager'],
             'sql'          => "blob NULL",
-            'eval'         => array('tl_class' => 'long clr'),
-            'fieldpalette' => array(
-                'config'   => array(
+            'eval'         => ['tl_class' => 'long clr'],
+            'fieldpalette' => [
+                'config'   => [
                     'hidePublished' => true,
-                ),
-                'list'     => array(
-                    'label' => array(
-                        'fields' => array('exporter_pdfFonts_fontName', 'exporter_pdfFonts_fontWeight'),
+                ],
+                'list'     => [
+                    'label' => [
+                        'fields' => ['exporter_pdfFonts_fontName', 'exporter_pdfFonts_fontWeight'],
                         'format' => '%s -> %s',
-                    ),
-                ),
-                'palettes' => array(
+                    ],
+                ],
+                'palettes' => [
                     'default' => 'exporter_pdfFonts_fontName,exporter_pdfFonts_fontWeight,exporter_pdfFonts_file',
-                ),
-                'fields'   => array(
-                    'exporter_pdfFonts_fontName'   => array(
+                ],
+                'fields'   => [
+                    'exporter_pdfFonts_fontName'   => [
                         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['exporter_pdfFonts_fontName'],
                         'inputType' => 'text',
-                        'eval'      => array('tl_class' => 'clr', 'mandatory' => true),
+                        'eval'      => ['tl_class' => 'clr', 'mandatory' => true],
                         'sql'       => "varchar(255) NOT NULL default ''",
-                    ),
-                    'exporter_pdfFonts_fontWeight' => array(
+                    ],
+                    'exporter_pdfFonts_fontWeight' => [
                         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['exporter_pdfFonts_fontWeight'],
                         'inputType' => 'select',
-                        'options'   => array('R', 'B', 'I', 'BI'),
+                        'options'   => ['R', 'B', 'I', 'BI'],
                         'reference' => &$GLOBALS['TL_LANG']['tl_exporter']['exporter_pdfFonts_fontWeightOptions'],
-                        'eval'      => array('tl_class' => 'clr', 'mandatory' => true, 'includeBlankOption' => true),
+                        'eval'      => ['tl_class' => 'clr', 'mandatory' => true, 'includeBlankOption' => true],
                         'sql'       => "varchar(16) NOT NULL default ''",
-                    ),
-                    'exporter_pdfFonts_file'       => array(
+                    ],
+                    'exporter_pdfFonts_file'       => [
                         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['exporter_pdfFonts_file'],
                         'inputType' => 'fileTree',
                         'exclude'   => true,
-                        'eval'      => array(
+                        'eval'      => [
                             'filesOnly'  => true,
                             'extensions' => 'ttf',
                             'fieldType'  => 'radio',
                             'mandatory'  => true,
                             'tl_class'   => 'w50',
-                        ),
+                        ],
                         'sql'       => "blob NULL",
-                    ),
-                ),
-            ),
-        ),
-        'pdfMargins'                => array(
+                    ],
+                ],
+            ],
+        ],
+        'pdfMargins'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfMargins'],
             'exclude'   => true,
             'inputType' => 'trbl',
-            'options'   => array('pt', 'in', 'cm', 'mm'),
-            'eval'      => array('includeBlankOption' => true, 'tl_class' => 'w50'),
+            'options'   => ['pt', 'in', 'cm', 'mm'],
+            'eval'      => ['includeBlankOption' => true, 'tl_class' => 'w50'],
             'sql'       => "varchar(128) NOT NULL default ''",
-        ),
-        'pdfTitle'                  => array(
+        ],
+        'pdfTitle'                  => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfTitle'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 64, 'tl_class' => 'w50 clr'),
+            'eval'      => ['maxlength' => 64, 'tl_class' => 'w50 clr'],
             'sql'       => "varchar(64) NOT NULL default ''",
-        ),
-        'pdfSubject'                => array(
+        ],
+        'pdfSubject'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfSubject'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 255, 'tl_class' => 'w50'),
+            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
             'sql'       => "varchar(255) NOT NULL default ''",
-        ),
-        'pdfCreator'                => array(
+        ],
+        'pdfCreator'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfCreator'],
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => array('maxlength' => 64, 'tl_class' => 'w50'),
+            'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
-        ),
-    ),
-);
+        ],
+    ],
+];
 
 $arrDca = &$GLOBALS['TL_DCA']['tl_exporter'];
 
@@ -607,13 +607,13 @@ if (in_array('protected_homedirs', \ModuleLoader::getActive()))
     $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE] =
         str_replace('useHomeDir', 'useHomeDir,useProtectedHomeDir', $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE]);
 
-    $arrDca['fields']['useProtectedHomeDir'] = array(
+    $arrDca['fields']['useProtectedHomeDir'] = [
         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['useProtectedHomeDir'],
         'exclude'   => true,
         'inputType' => 'checkbox',
-        'eval'      => array('tl_class' => 'w50'),
+        'eval'      => ['tl_class' => 'w50'],
         'sql'       => "char(1) NOT NULL default ''",
-    );
+    ];
 }
 
 class tl_exporter extends \Backend
