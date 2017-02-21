@@ -134,8 +134,26 @@ class MediaExporter extends Exporter
         }
     }
 
-    protected function buildFileName()
+    protected function buildFilename($objEntity = null)
     {
-        return 'export-' . $this->linkedTable . '_' . date('Y-m-d_H-i', time()) . '.' . $this->compressionType;
+        $strFilename = $this->fileName ?: 'export';
+
+        if ($this->fileNameAddDatime)
+        {
+            $strFilename = date($this->fileNameAddDatimeFormat ?: 'Y-m-d') . '_' . $strFilename;
+        }
+
+        if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFilename']) && is_array($GLOBALS['TL_HOOKS']['exporter_modifyFilename']))
+        {
+            foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFilename'] as $callback)
+            {
+                $objCallback      = \System::importStatic($callback[0]);
+                $strFixedFilename = $objCallback->$callback[1]($strFilename, $this);
+
+                $strFilename = $strFixedFilename ?: $strFilename;
+            }
+        }
+
+        return $strFilename . '.' . $this->compressionType;
     }
 }
