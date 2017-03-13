@@ -110,7 +110,7 @@ abstract class Exporter extends \Controller
             {
                 foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFileDir'] as $callback)
                 {
-                    $objCallback      = \System::importStatic($callback[0]);
+                    $objCallback = \System::importStatic($callback[0]);
                     $strFixedDir = $objCallback->$callback[1]($strDir, $this);
 
                     $strDir = $strFixedDir ?: $strDir;
@@ -214,7 +214,7 @@ abstract class Exporter extends \Controller
         }
 
         // SELECT
-        $strQuery = 'SELECT id,' . implode(',', $arrExportFields) . ' FROM ' . $this->linkedTable;
+        $strQuery = 'SELECT ' . implode(',', $arrExportFields) . ' FROM ' . $this->linkedTable;
 
         // JOIN
         if ($this->addJoinTables)

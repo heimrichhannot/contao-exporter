@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [3.0.10] - 2017-03-13
+
+### Fixed
+- Remove unqualified id from SELECT statement to avoid sql ambiguous error on joins 
+
 ## [3.0.9] - 2017-02-21
 
 ### Fixed
