@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.1] - 2017-03-17
+
+### Fixed
+- composer.json
+
 ## [4.0.0] - 2017-03-17
 
 ### Added
