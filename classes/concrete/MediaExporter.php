@@ -51,7 +51,9 @@ class MediaExporter extends Exporter
                         $objDc->activeRecord = $objDbResult;
                         $objDc->id           = $objDbResult->id;
 
-                        $varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$key], $this->linkedTable, $objDc);
+                        $strField = str_replace($this->linkedTable . '.', '', $key);
+
+                        $varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$strField], $this->linkedTable, $objDc);
 
                         if (!is_array($varValue))
                         {
@@ -71,7 +73,7 @@ class MediaExporter extends Exporter
                                     foreach ($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename'] as $callback)
                                     {
                                         $objCallback      = \System::importStatic($callback[0]);
-                                        $strFixedFilename = $objCallback->$callback[1]($objFile, $key, $strPath, $this);
+                                        $strFixedFilename = $objCallback->$callback[1]($objFile, $strField, $strPath, $this);
 
                                         if ($strFixedFilename)
                                         {

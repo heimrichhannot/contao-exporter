@@ -103,8 +103,6 @@ abstract class PhpExcelExporter extends Exporter
                         $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
                     }
 
-                    echo 1;
-
                     foreach ($arrRow as $key => $varValue)
                     {
                         $varValue            = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
