@@ -33,6 +33,6 @@ class CsvExporter extends PhpExcelExporter
 
     public function updateWriter($objWriter)
     {
-        $objWriter->setDelimiter($this->delimiter ?: ',')->setEnclosure($this->enclosure ?: '"')->setSheetIndex(0);
+        $objWriter->setDelimiter($this->fieldDelimiter ?: ',')->setEnclosure($this->fieldEnclosure ?: '"')->setSheetIndex(0);
     }
 }

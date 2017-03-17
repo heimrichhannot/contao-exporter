@@ -164,22 +164,23 @@ abstract class Exporter extends \Controller
             \Controller::loadDataContainer($strTable);
             \System::loadLanguageFile($strTable);
 
-            $strFieldName = $GLOBALS['TL_DCA'][$strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
+            $strFieldLabel = $GLOBALS['TL_DCA'][$strTable]['fields'][$blnRawField ? $strRawFieldName : $strField]['label'][0];
             $strLabel     = $strField;
 
             if ($this->overrideHeaderFieldLabels
-                && ($arrRow = Arrays::getRowInMcwArray('field', $strField, deserialize($this->headerFieldLabels, true))) !== false
+                && ($arrRow = Arrays::getRowInMcwArray('field', $strTable . '.' . $strField, deserialize($this->headerFieldLabels, true))) !== false
             )
             {
                 $strLabel = $arrRow['label'];
             }
-            elseif ($this->localizeHeader && $strFieldName)
+            elseif ($this->localizeHeader && $strFieldLabel)
             {
-                $strLabel = $strFieldName;
+                $strLabel = $strFieldLabel;
             }
 
-            $arrFields[$strField] = strip_tags(html_entity_decode($strLabel)) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
+            $arrFields[] = strip_tags(html_entity_decode($strLabel)) . ($blnRawField ? $GLOBALS['TL_LANG']['MSC']['exporter']['unformatted'] : '');
         }
+
         if (isset($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'])
             && is_array(
                 $GLOBALS['TL_HOOKS']['exporter_modifyXlsHeaderFields']
@@ -209,7 +210,7 @@ abstract class Exporter extends \Controller
             }
             else
             {
-                $arrExportFields[] = $strField;
+                $arrExportFields[] = $strField . ' AS "' . $strField . '"';
             }
         }
 
@@ -223,7 +224,7 @@ abstract class Exporter extends \Controller
 
             foreach ($arrJoinTables as $joinT)
             {
-                $strQuery .= ' INNER JOIN ' . $joinT['table'] . ' ON ' . $joinT['condition'];
+                $strQuery .= ' INNER JOIN ' . $joinT['joinTable'] . ' ON ' . $joinT['joinCondition'];
             }
         }
 

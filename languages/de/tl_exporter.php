@@ -15,7 +15,7 @@ $arrLang['linkedTable'] = ['Verknüpfte Tabelle', 'Wählen Sie hier die Tabelle 
 $arrLang['tableFieldsForExport'] = ['Felder', 'Wählen Sie hier die Felder aus, die exportiert werden sollen.'];
 $arrLang['localizeFields'] = ['Feldwerte lokalisieren', 'Wählen Sie diese Option, wenn die Feldwerte lokalisiert werden sollen.'];
 $arrLang['addJoinTables'] = ['Join hinzufügen', 'Wählen Sie diese Option, wenn die verknüpfte Tabelle mit einer oder mehreren anderen Tabellen vereint werden soll.'];
-$arrLang['joinTables'] = ['Join-Elemente', ''];
+$arrLang['joinTables'] = ['Join-Elemente (ACHTUNG: Felder der gejointen Tabellen werden erst nach dem Speichern auswählbar)', ''];
 $arrLang['joinTable'] = ['Tabelle', 'Wählen Sie die Tabelle aus, die mit der verknüpften Tabelle vereint werden soll. '];
 $arrLang['joinCondition'] = ['ON-Bedingung', 'Geben Sie hier Bedingungen für die ON-Klausel in der Form "Verknüpfte-Tabelle.Wert = Join-Tabelle.Wert" ein.'];
 $arrLang['addUnformattedFields'] = ['Unformatierte Felder nutzen', 'Wählen Sie diese Option, wenn Felder in unformatierter Form exportierbar sein sollen.'];
@@ -61,8 +61,8 @@ $arrLang['addHeaderToExportTable'] = ['Feldnamen im Tabellenkopf anzeigen', 'Wä
 $arrLang['localizeHeader'] = ['Tabellenkopf lokalisieren', 'Wählen Sie diese Option, wenn die Feldnamen im Tabellenkopf lokalisiert werden sollen.'];
 $arrLang['overrideHeaderFieldLabels'] = ['Felder im Tabellenkopf überschreiben', 'Wählen Sie diese Option, wenn Sie die Namen von Feldern im Tabellenkopf anpassen möchten.'];
 $arrLang['headerFieldLabels'] = ['Tabellenkopffelder', 'Geben Sie her die gewünschten Änderungen ein.'];
-$arrLang['headerFieldLabels']['field'] = 'Feld';
-$arrLang['headerFieldLabels']['label'] = 'Name';
+$arrLang['headerFieldLabels']['field'] = ['Feld', ''];
+$arrLang['headerFieldLabels']['label'] = ['Name', ''];
 
 
 /**

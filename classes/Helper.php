@@ -13,6 +13,7 @@ namespace HeimrichHannot\Exporter;
 
 
 use HeimrichHannot\Haste\Dca\General;
+use HeimrichHannot\MultiColumnEditor\Backend\MultiColumnEditor;
 
 class Helper
 {
@@ -34,38 +35,21 @@ class Helper
 
     public static function getJoinTables($intExporter)
     {
-        $objJoinTables = \HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByPidAndTableAndField(
-            $intExporter,
-            'tl_exporter',
-            'joinTables'
-        );
-
-        if ($objJoinTables !== null)
+        if (($objExporter = ExporterModel::findByPk($intExporter)) === null || !$objExporter->addJoinTables)
         {
-            return $objJoinTables->fetchEach('joinTable');
+            return [];
         }
 
-        return [];
+        return MultiColumnEditor::fetchEach('joinTable', deserialize($objExporter->joinTables, true));
     }
 
     public static function getJoinTablesAndConditions($intExporter)
     {
-        $arrTables = [];
-
-        $objJoins = \HeimrichHannot\FieldPalette\FieldPaletteModel::findPublishedByPidAndTableAndField(
-            $intExporter,
-            'tl_exporter',
-            'joinTables'
-        );
-
-        while ($objJoins->next())
+        if (($objExporter = ExporterModel::findByPk($intExporter)) === null || !$objExporter->addJoinTables)
         {
-            $arrTables[] = [
-                'table'     => $objJoins->joinTable,
-                'condition' => $objJoins->joinCondition,
-            ];
+            return [];
         }
 
-        return $arrTables;
+        return deserialize($objExporter->joinTables, true);
     }
 }

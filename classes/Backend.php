@@ -10,15 +10,19 @@ class Backend extends \Controller
 {
     public static function getTableFields($objDc)
     {
-        $blnUnformatted = $objDc->activeRecord->addUnformattedFields && $objDc->activeRecord->type != Exporter::TYPE_ITEM &&
-                          $objDc->activeRecord->fileType != EXPORTER_FILE_TYPE_MEDIA;
-        $blnJoins       = $objDc->activeRecord->addJoinTables;
+        if (($objExporter = ExporterModel::findByPk($objDc->id)) === null)
+            return [];
 
-        $arrOptions = static::doGetTableFields($objDc->activeRecord->linkedTable, $blnUnformatted, $blnJoins);
 
-        if ($objDc->activeRecord->addJoinTables)
+        $blnUnformatted = $objExporter->addUnformattedFields && $objExporter->type != Exporter::TYPE_ITEM &&
+                          $objExporter->fileType != EXPORTER_FILE_TYPE_MEDIA;
+        $blnJoins       = $objExporter->addJoinTables;
+
+        $arrOptions = static::doGetTableFields($objExporter->linkedTable, $blnUnformatted, $blnJoins);
+
+        if ($objExporter->addJoinTables)
         {
-            foreach (Helper::getJoinTables($objDc->activeRecord->id) as $strTable)
+            foreach (Helper::getJoinTables($objExporter->id) as $strTable)
             {
                 $arrOptions = array_merge($arrOptions, static::doGetTableFields($strTable, $blnUnformatted, $blnJoins));
             }
@@ -30,7 +34,6 @@ class Backend extends \Controller
     public static function doGetTableFields($strTable, $blnIncludeUnformatted = false, $blnPrefixTableName = false)
     {
         $arrOptions        = [];
-        $strTableName      = $strTable;
 
         if (!$strTable)
         {
@@ -71,8 +74,6 @@ class Backend extends \Controller
 
             $arrOptions += array_combine($arrOptionsRawKeys, $arrOptionsRawValues);
         }
-
-        asort($arrOptions);
 
         return $arrOptions;
     }

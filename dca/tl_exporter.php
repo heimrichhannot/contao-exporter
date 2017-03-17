@@ -64,7 +64,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'label'      => &$GLOBALS['TL_LANG']['tl_exporter']['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"',
+                'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
+                                . '\'))return false;Backend.getScrollOffset()"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_exporter']['show'],
@@ -87,9 +88,9 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
         ],
         'default'                                    => '{title_legend},title,type;',
         \HeimrichHannot\Exporter\Exporter::TYPE_LIST => '{title_legend},title,type;' . '{export_legend},target,fileType;'
-                                                        . '{table_legend},globalOperationKey,linkedTable,restrictToPids,addUnformattedFields,tableFieldsForExport,addJoinTables,whereClause,orderBy;',
+                                                        . '{table_legend},globalOperationKey,linkedTable,addJoinTables,addUnformattedFields,tableFieldsForExport,restrictToPids,whereClause,orderBy;',
         \HeimrichHannot\Exporter\Exporter::TYPE_ITEM => '{title_legend},title,type;' . '{export_legend},target,fileType;'
-                                                        . '{table_legend},linkedTable,skipFields,skipLabels,addJoinTables,whereClause,orderBy;',
+                                                        . '{table_legend},linkedTable,addJoinTables,skipFields,skipLabels,whereClause,orderBy;',
     ],
 
     // Subpalettes
@@ -172,14 +173,20 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             ],
             'sql'              => "varchar(255) NOT NULL default ''",
         ],
-        'restrictToPids' => [
-            'label'                   => &$GLOBALS['TL_LANG']['tl_exporter']['restrictToPids'],
-            'exclude'                 => true,
-            'filter'                  => true,
-            'inputType'               => 'select',
+        'restrictToPids'            => [
+            'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['restrictToPids'],
+            'exclude'          => true,
+            'filter'           => true,
+            'inputType'        => 'select',
             'options_callback' => ['\HeimrichHannot\Exporter\Backend', 'getTableArchives'],
-            'eval'                    => ['tl_class' => 'long clr', 'style' => 'width: 97%', 'chosen' => true, 'includeBlankOption' => true, 'multiple' => true],
-            'sql'                     => "blob NULL"
+            'eval'             => [
+                'tl_class'           => 'long clr',
+                'style'              => 'width: 97%',
+                'chosen'             => true,
+                'includeBlankOption' => true,
+                'multiple'           => true
+            ],
+            'sql'              => "blob NULL"
         ],
         'skipFields'                => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['skipFields'],
@@ -302,24 +309,25 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
         'headerFieldLabels'         => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels'],
             'exclude'   => true,
-            'inputType' => 'multiColumnWizard',
+            'inputType' => 'multiColumnEditor',
             'eval'      => [
-                'tl_class'     => 'clr',
-                'columnFields' => [
-                    'field' => [
-                        'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['field'],
-                        'exclude'          => true,
-                        'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
-                        'inputType'        => 'select',
-                        'eval'             => ['style' => 'width: 250px'],
-                    ],
-                    'label' => [
-                        'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['label'],
-                        'exclude'   => true,
-                        'inputType' => 'text',
-                        'eval'      => ['style' => 'width: 250px'],
-                    ],
-                ],
+                'tl_class'          => 'clr',
+                'multiColumnEditor' => [
+                    'minRowCount' => 0,
+                    'fields'      => [
+                        'field' => [
+                            'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['field'],
+                            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getTableFields'],
+                            'inputType'        => 'select',
+                            'eval'             => ['chosen' => true, 'style' => 'width: 250px'],
+                        ],
+                        'label' => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['headerFieldLabels']['label'],
+                            'inputType' => 'text',
+                            'eval'      => ['style' => 'width: 250px'],
+                        ],
+                    ]
+                ]
             ],
             'sql'       => "blob NULL",
         ],
@@ -384,7 +392,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'eval'      => ['tl_class' => 'w50'],
             'sql'       => "char(1) NOT NULL default ''",
         ],
-        'fileSubDirName'                  => [
+        'fileSubDirName'            => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileSubDirName'],
             'exclude'   => true,
             'search'    => true,
@@ -423,46 +431,31 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'sql'       => "char(1) NOT NULL default ''",
         ],
         'joinTables'                => [
-            'label'        => &$GLOBALS['TL_LANG']['tl_exporter']['joinTables'],
-            'inputType'    => 'fieldpalette',
-            'foreignKey'   => 'tl_fieldpalette.id',
-            'relation'     => ['type' => 'hasMany', 'load' => 'eager'],
-            'sql'          => "blob NULL",
-            'fieldpalette' => [
-                'config'   => [
-                    'hidePublished' => true,
-                ],
-                'list'     => [
-                    'label' => [
-                        'fields' => ['joinTable', 'joinCondition'],
-                        'format' => '%s <span style="color:#b3b3b3;padding-left:3px">[%s]</span>',
-                    ],
-                ],
-                'palettes' => [
-                    'default' => 'joinTable,joinCondition',
-                ],
-                'fields'   => [
-                    'joinTable'     => [
-                        'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['joinTable'],
-                        'exclude'          => true,
-                        'inputType'        => 'select',
-                        'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getAllTablesAsOptions'],
-                        'eval'             => [
-                            'includeBlankOption' => true,
+            'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['joinTables'],
+            'inputType' => 'multiColumnEditor',
+            'eval'      => [
+                'multiColumnEditor' => [
+                    'fields' => [
+                        'joinTable'     => [
+                            'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['joinTable'],
+                            'inputType'        => 'select',
+                            'options_callback' => ['HeimrichHannot\Exporter\Backend', 'getAllTablesAsOptions'],
+                            'eval'             => [
+                                'chosen'             => true,
+                                'mandatory'          => true,
+                                'includeBlankOption' => true,
+                                'style'              => 'width: 250px'
+                            ]
                         ],
-                        'sql'              => "varchar(255) NOT NULL default ''",
-                    ],
-                    'joinCondition' => [
-                        'label'       => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
-                        'sorting'     => true,
-                        'inputType'   => 'text',
-                        'exclude'     => true,
-                        'eval'        => ['class' => 'long', 'decodeEntities' => true],
-                        'explanation' => 'insertTags',
-                        'sql'         => "varchar(255) NOT NULL default ''",
+                        'joinCondition' => [
+                            'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
+                            'inputType' => 'text',
+                            'eval'      => ['class' => 'long', 'decodeEntities' => true, 'mandatory' => true, 'style' => 'width: 400px']
+                        ],
                     ],
                 ],
             ],
+            'sql'       => "blob NULL",
         ],
         'whereClause'               => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['whereClause'],
@@ -604,8 +597,11 @@ $arrDca = &$GLOBALS['TL_DCA']['tl_exporter'];
 
 if (in_array('protected_homedirs', \ModuleLoader::getActive()))
 {
-    $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE] =
-        str_replace('useHomeDir', 'useHomeDir,useProtectedHomeDir', $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE]);
+    $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE] = str_replace(
+        'useHomeDir',
+        'useHomeDir,useProtectedHomeDir',
+        $arrDca['subpalettes']['target_' . \HeimrichHannot\Exporter\Exporter::TARGET_FILE]
+    );
 
     $arrDca['fields']['useProtectedHomeDir'] = [
         'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['useProtectedHomeDir'],

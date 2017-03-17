@@ -72,7 +72,6 @@ abstract class PhpExcelExporter extends Exporter
                 while ($objDbResult->next())
                 {
                     $arrRow = $objDbResult->row();
-                    unset($arrRow['id']);
                     $intCol = 0;
 
                     $objDc               = new DC_HastePlus($this->linkedTable);
@@ -103,6 +102,8 @@ abstract class PhpExcelExporter extends Exporter
                         // refresh
                         $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
                     }
+
+                    echo 1;
 
                     foreach ($arrRow as $key => $varValue)
                     {

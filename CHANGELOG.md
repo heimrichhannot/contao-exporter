@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.0] - 2017-03-17
+
+### Added
+- removed multiColumnWizard dependency -> replaced by multi_column_editor -> joinTables needs to be set again, headerFieldLabels should work out of the box
+
+### Fixed
+- fieldDelimiter is now respected for csv again
+- column matching when using joins
+
 ## [3.0.10] - 2017-03-13
 
 ### Fixed
