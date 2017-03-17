@@ -105,9 +105,11 @@ abstract class PhpExcelExporter extends Exporter
 
                     foreach ($arrRow as $key => $varValue)
                     {
+                        $strField = str_replace($this->linkedTable . '.', '', $key);
+
                         $varValue            = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
                             $varValue,
-                            $arrDca['fields'][$key],
+                            $arrDca['fields'][$strField],
                             $this->linkedTable,
                             $objDc
                         ) : $varValue;
