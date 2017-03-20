@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.4] - 2017-03-17
+
+### Fixed
+- backend css for form group container
+
 ## [4.0.3] - 2017-03-17
 
 ### Fixed

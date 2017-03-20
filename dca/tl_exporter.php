@@ -64,8 +64,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'label'      => &$GLOBALS['TL_LANG']['tl_exporter']['delete'],
                 'href'       => 'act=delete',
                 'icon'       => 'delete.gif',
-                'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm']
-                                . '\'))return false;Backend.getScrollOffset()"',
+                'attributes' => 'onclick="if(!confirm(\'' . $GLOBALS['TL_LANG']['MSC']['deleteConfirm'] . '\'))return false;Backend.getScrollOffset()"',
             ],
             'show'   => [
                 'label' => &$GLOBALS['TL_LANG']['tl_exporter']['show'],
@@ -184,9 +183,9 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'style'              => 'width: 97%',
                 'chosen'             => true,
                 'includeBlankOption' => true,
-                'multiple'           => true
+                'multiple'           => true,
             ],
-            'sql'              => "blob NULL"
+            'sql'              => "blob NULL",
         ],
         'skipFields'                => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['skipFields'],
@@ -326,8 +325,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                             'inputType' => 'text',
                             'eval'      => ['style' => 'width: 250px'],
                         ],
-                    ]
-                ]
+                    ],
+                ],
             ],
             'sql'       => "blob NULL",
         ],
@@ -444,13 +443,19 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                                 'chosen'             => true,
                                 'mandatory'          => true,
                                 'includeBlankOption' => true,
-                                'style'              => 'width: 250px'
-                            ]
+                                'groupStyle'         => 'width: 250px',
+                                'style'              => 'width: 250px',
+                            ],
                         ],
                         'joinCondition' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
                             'inputType' => 'text',
-                            'eval'      => ['class' => 'long', 'decodeEntities' => true, 'mandatory' => true, 'style' => 'width: 400px']
+                            'eval'      => ['class'          => 'long',
+                                            'decodeEntities' => true,
+                                            'mandatory'      => true,
+                                            'groupStyle'     => 'width: 400px',
+                                            'style'          => 'width: 400px',
+                            ],
                         ],
                     ],
                 ],
