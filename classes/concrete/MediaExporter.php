@@ -73,7 +73,7 @@ class MediaExporter extends Exporter
                                     foreach ($GLOBALS['TL_HOOKS']['exporter_modifyMediaFilename'] as $callback)
                                     {
                                         $objCallback      = \System::importStatic($callback[0]);
-                                        $strFixedFilename = $objCallback->$callback[1]($objFile, $strField, $strPath, $this);
+                                        $strFixedFilename = $objCallback->{$callback[1]}($objFile, $strField, $strPath, $this);
 
                                         if ($strFixedFilename)
                                         {
@@ -150,7 +150,7 @@ class MediaExporter extends Exporter
             foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFilename'] as $callback)
             {
                 $objCallback      = \System::importStatic($callback[0]);
-                $strFixedFilename = $objCallback->$callback[1]($strFilename, $this);
+                $strFixedFilename = $objCallback->{$callback[1]}($strFilename, $this);
 
                 $strFilename = $strFixedFilename ?: $strFilename;
             }

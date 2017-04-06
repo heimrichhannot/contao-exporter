@@ -111,7 +111,7 @@ abstract class Exporter extends \Controller
                 foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFileDir'] as $callback)
                 {
                     $objCallback = \System::importStatic($callback[0]);
-                    $strFixedDir = $objCallback->$callback[1]($strDir, $this);
+                    $strFixedDir = $objCallback->{$callback[1]}($strDir, $this);
 
                     $strDir = $strFixedDir ?: $strDir;
                 }
@@ -137,7 +137,7 @@ abstract class Exporter extends \Controller
             foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFilename'] as $callback)
             {
                 $objCallback      = \System::importStatic($callback[0]);
-                $strFixedFilename = $objCallback->$callback[1]($strFilename, $this);
+                $strFixedFilename = $objCallback->{$callback[1]}($strFilename, $this);
 
                 $strFilename = $strFixedFilename ?: $strFilename;
             }
@@ -190,7 +190,7 @@ abstract class Exporter extends \Controller
             foreach ($GLOBALS['TL_HOOKS']['exporter_modifyHeaderFields'] as $callback)
             {
                 $objCallback = \System::importStatic($callback[0]);
-                $arrFields   = $objCallback->$callback[1]($arrFields, $this);
+                $arrFields   = $objCallback->{$callback[1]}($arrFields, $this);
             }
         }
 
