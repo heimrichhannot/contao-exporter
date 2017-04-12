@@ -1,7 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [4.0.4] - 2017-04-06
+## [4.0.6] - 2017-04-12
+
+### Changed
+- added php7 support. fixed contao-core dependency
+
+## [4.0.5] - 2017-04-06
 
 ### Changed
 - added php7 support. fixed contao-core dependency
