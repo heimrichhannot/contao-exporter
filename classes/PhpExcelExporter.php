@@ -76,7 +76,8 @@ abstract class PhpExcelExporter extends Exporter
 
                     $objDc               = new DC_HastePlus($this->linkedTable);
                     $objDc->activeRecord = $objDbResult;
-                    $objDc->id           = $objDbResult->id;
+                    $strId = $this->linkedTable . '.id';
+                    $objDc->id           = $objDbResult->{$strId};
 
                     // trigger onload_callback since these could modify the dca
                     if (is_array($arrDca['config']['onload_callback']))

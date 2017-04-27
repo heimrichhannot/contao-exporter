@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.7] - 2017-04-27
+
+### Fixed
+- id issue for option values
+
 ## [4.0.6] - 2017-04-12
 
 ### Changed
