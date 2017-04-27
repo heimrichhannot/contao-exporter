@@ -126,7 +126,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'mandatory' => true,
                 'maxlength' => 255,
             ],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'sql'       => "varchar(196) NOT NULL default ''",
         ],
         'type'                      => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['type'],
@@ -170,7 +170,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'includeBlankOption' => true,
                 'tl_class'           => 'w50',
             ],
-            'sql'              => "varchar(255) NOT NULL default ''",
+            'sql'              => "varchar(32) NOT NULL default ''",
         ],
         'restrictToPids'            => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['restrictToPids'],
@@ -246,7 +246,7 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                 'submitOnChange'     => true,
                 'tl_class'           => 'w50 clr',
             ],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'sql'       => "varchar(10) NOT NULL default ''",
         ],
         'exporterClass'             => [
             'label'            => &$GLOBALS['TL_LANG']['tl_exporter']['exporterClass'],
@@ -404,8 +404,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
+            'sql'       => "varchar(64) NOT NULL default ''",
         ],
         'fileNameAddDatime'         => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['fileNameAddDatime'],
@@ -419,8 +419,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'eval'      => ['maxlength' => 32, 'tl_class' => 'w50'],
+            'sql'       => "varchar(32) NOT NULL default ''",
         ],
         'addJoinTables'             => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['addJoinTables'],
@@ -450,11 +450,12 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
                         'joinCondition' => [
                             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['joinCondition'],
                             'inputType' => 'text',
-                            'eval'      => ['class'          => 'long',
-                                            'decodeEntities' => true,
-                                            'mandatory'      => true,
-                                            'groupStyle'     => 'width: 400px',
-                                            'style'          => 'width: 400px',
+                            'eval'      => [
+                                'class'          => 'long',
+                                'decodeEntities' => true,
+                                'mandatory'      => true,
+                                'groupStyle'     => 'width: 400px',
+                                'style'          => 'width: 400px',
                             ],
                         ],
                     ],
@@ -584,8 +585,8 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'exclude'   => true,
             'search'    => true,
             'inputType' => 'text',
-            'eval'      => ['maxlength' => 255, 'tl_class' => 'w50'],
-            'sql'       => "varchar(255) NOT NULL default ''",
+            'eval'      => ['maxlength' => 128, 'tl_class' => 'w50'],
+            'sql'       => "varchar(128) NOT NULL default ''",
         ],
         'pdfCreator'                => [
             'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['pdfCreator'],
