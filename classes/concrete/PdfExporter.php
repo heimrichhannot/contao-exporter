@@ -62,7 +62,7 @@ class PdfExporter extends Exporter
                                 $strMethod = 'addRegularFont';
                         }
 
-                        $objPdf->$strMethod(
+                        $objPdf->{$strMethod}(
                             $objPdfFonts->exporter_pdfFonts_fontName,
                             Files::getPathFromUuid($objPdfFonts->exporter_pdfFonts_file)
                         );
