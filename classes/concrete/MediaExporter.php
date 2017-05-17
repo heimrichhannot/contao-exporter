@@ -49,11 +49,17 @@ class MediaExporter extends Exporter
                     {
                         $objDc               = new DC_HastePlus($this->linkedTable);
                         $objDc->activeRecord = $objDbResult;
-                        $objDc->id           = $objDbResult->id;
+                        $strId               = $this->linkedTable . '.id';
+                        $objDc->id           = $objDbResult->{$strId};
 
                         $strField = str_replace($this->linkedTable . '.', '', $key);
 
                         $varValue = FormSubmission::prepareSpecialValueForPrint($varValue, $arrDca['fields'][$strField], $this->linkedTable, $objDc);
+
+                        if (strpos($varValue, ', ') !== false)
+                        {
+                            $varValue = explode(', ', $varValue);
+                        }
 
                         if (!is_array($varValue))
                         {

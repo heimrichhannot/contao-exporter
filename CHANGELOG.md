@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.10] - 2017-05-17
+
+### Fixed
+- array issues for media exporter
+
 ## [4.0.9] - 2017-05-09
 
 ### Fixed
