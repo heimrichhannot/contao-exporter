@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.0.11] - 2017-05-17
+
+### Fixed
+- No parent table found for childtable exception, if no parent table exists
+
 ## [4.0.10] - 2017-05-17
 
 ### Fixed

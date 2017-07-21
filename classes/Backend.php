@@ -206,7 +206,7 @@ class Backend extends \Controller
     {
         $arrOptions = [];
 
-        if ($objDc->activeRecord->linkedTable)
+        if ($objDc->activeRecord->linkedTable && $GLOBALS['TL_DCA'][$objDc->activeRecord->linkedTable]['config']['ptable'])
         {
             $objArchives = General::getTableArchives($objDc->activeRecord->linkedTable, [
                 'order' => 'title ASC'
