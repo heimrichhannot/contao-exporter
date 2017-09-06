@@ -120,6 +120,19 @@ abstract class PhpExcelExporter extends Exporter
                             $varValue = Arrays::flattenArray($varValue);
                         }
 
+                        if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'])
+                            && is_array(
+                                $GLOBALS['TL_HOOKS']['exporter_modifyFieldValue']
+                            )
+                        )
+                        {
+                            foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'] as $callback)
+                            {
+                                $objCallback      = \System::importStatic($callback[0]);
+                                $varValue = $objCallback->{$callback[1]}($varValue, $strField, $arrRow, $intCol);
+                            }
+                        }
+
                         $this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(
                             $intCol,
                             $intRow,

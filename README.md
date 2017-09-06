@@ -33,6 +33,7 @@ exporter_modifyHeaderFields | $arrFields, $objExporter | $arrFields | Modify the
 exporter_modifyMediaFilename | $objFile, $strFieldname, $varFieldValue, $objMediaExporter | $objFile->path | Modify a filename just before added to the archive when using *MediaExporter* (also folder structure could be modified here)
 exporter_modifyFilename | $strFilename, $objExporter | $strFilename | Modify the export filename
 exporter_modifyFilePath | $strFilePath, $objExporter | $strFilePath | Modify the export file path
+exporter_modifyFieldValue | $varValue, $strField, $arrRow, $intCol | $varValue | Modify the field values. Only available in PhpExcelExporter
 
 ## Technical instruction
 

@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.1.0] - 2017-09-06
+
+### Added
+* Hook `exporter_modifyFieldValue` to PhpExcelExporter
+
+
 ## [4.0.11] - 2017-05-17
 
 ### Fixed
