@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.2.0] - 2018-02-27
+
+### Added
+- enabled different export types for frontend exporter
+
 ## [4.1.0] - 2017-09-06
 
 ### Added

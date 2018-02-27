@@ -2,9 +2,16 @@
 
 namespace HeimrichHannot\Exporter;
 
+use HeimrichHannot\Exporter\Concrete\CsvExporter;
+use HeimrichHannot\Exporter\Concrete\MediaExporter;
+use HeimrichHannot\Exporter\Concrete\PdfExporter;
+use HeimrichHannot\Exporter\Concrete\XlsExporter;
+use HeimrichHannot\Request\Request;
+
 class ModuleFrontendExporter extends \Module
 {
 	protected $strTemplate = 'mod_frontend_export';
+	protected $config;
 
 	public function generate()
 	{
@@ -26,117 +33,50 @@ class ModuleFrontendExporter extends \Module
 
 	protected function compile()
 	{
-		$intMemberId = $this->getMemberId();
+		$this->config = ExporterModel::findByPk($this->exporterConfig);
+		
+		if(null === $this->config)
+        {
+            return;
+        }
+	    
+	    $entity = $this->getEntity();
+        
+        $this->Template->action = '';
+        $this->Template->method = 'POST';
+        $this->Template->type = $this->getExporterType();
+        
+        $this->Template->btnLabel = $this->exporterBtnLabel;
+		
+        if(null === ($exportType = Request::getPost('export')))
+        {
+            return;
+        }
 
-		if (\Input::post('export'))
-		{
-			$objConfig = ExporterModel::findById($this->exporterConfig);
-
-			if ($objConfig == null)
-				return;
-
-			switch(\Input::post('export'))
-			{
-				case EXPORTER_FILE_TYPE_CSV:
-					$objExporter = new CsvExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_MEDIA:
-					$objExporter = new MediaExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_PDF:
-					$objExporter = new PdfExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_XLS:
-					$objExporter = new XlsExporter($objConfig);
-					break;
-			}
-
-			if ($objExporter)
-				$objExporter->export($this->exporterExportType, $intMemberId);
-		}
-
-		$this->Template->action = '';
-		$this->Template->method = 'POST';
-		$this->Template->noRights = $intMemberId ? false : true;
-
-		$this->Template->btnLabel = $this->exporterBtnLabel;
+        if(!class_exists($this->config->exporterClass))
+        {
+            return;
+        }
+        
+        $exporter = new $this->config->exporterClass($this->config);
+        
+        
+        if(null === $exporter)
+        {
+            return;
+        }
+        
+        $exporter->export($entity, deserialize($this->config->tableFieldsForExport,true));
 	}
 
-	public static function export($objDc)
-	{
-		$strExportType = \Input::get('exportType') ? : 'list';
-		$strGlobalOperationKey = \Input::get('key');
-		$intId = \Input::get('id') ? : '';
-		$strTable = \Input::get('table') ? : $objDc->table;
-
-		if (!$strGlobalOperationKey || !$strTable)
-			return;
-
-		if (($objConfig = ExporterModel::findByKeyAndTable($strGlobalOperationKey, $strTable)) === null)
-		{
-			if (empty($_SESSION['TL_ERROR']))
-			{
-				\Message::addError($GLOBALS['TL_LANG']['MSC']['exporter']['noConfigFound']);
-				\Controller::redirect($_SERVER['HTTP_REFERER']);
-			}
-		}
-		else
-		{
-			$objExporter = null;
-
-			switch($objConfig->fileType)
-			{
-				case EXPORTER_FILE_TYPE_CSV:
-					$objExporter = new CsvExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_MEDIA:
-					$objExporter = new MediaExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_PDF:
-					$objExporter = new PdfExporter($objConfig);
-					break;
-				case EXPORTER_FILE_TYPE_XLS:
-					$objExporter = new XlsExporter($objConfig);
-					break;
-			}
-
-			if ($objExporter)
-				$objExporter->export($strExportType, $intId);
-
-			die();
-		}
+    protected function getEntity()
+    {
+        return $this->config->linkedTable;
 	}
 
-	protected function getMemberId()
-	{
-		$intMemberId = null;
-
-		if (TL_MODE == 'FE')
-		{
-			$this->import('FrontendUser', 'Member');
-			if (FE_USER_LOGGED_IN)
-			{
-				$intMemberId = $this->Member->id;
-
-				$arrMemberGroups = $this->Member->groups;
-				$arrRequiredGrous = deserialize($this->exporterUseIdGroups, true);
-				$arrIntersect = array_intersect($arrMemberGroups, $arrRequiredGrous);
-
-				if ($this->exporterExportType == 'item' && $this->exporterUseIdFromUrl &&
-					is_numeric(\Input::get('id')) && \Input::get('id') != $this->Member->id)
-				{
-					$intMemberId = \Input::get('id');
-
-					if ($this->exporterUseIdGroups != null && empty($arrIntersect))
-					{
-						$intMemberId = null;
-					}
-				}
-
-			}
-		}
-
-		return $intMemberId;
+    protected function getExporterType()
+    {
+        return $this->config->fileType;
 	}
 
 	public static function getGlobalOperation($strName, $strLabel = '', $strIcon = '')
