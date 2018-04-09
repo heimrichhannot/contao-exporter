@@ -39,27 +39,19 @@ abstract class PhpExcelExporter extends Exporter
 
     protected function doExport($objEntity = null, array $arrFields = [])
     {
-        switch ($this->type)
-        {
+        switch ($this->type) {
             case Exporter::TYPE_ITEM:
                 break;
             case Exporter::TYPE_LIST:
                 $objDbResult = $this->getEntities();
-                $arrDca          = $GLOBALS['TL_DCA'][$this->linkedTable];
-
-                if (!$objDbResult->numRows > 0)
-                {
-                    return;
-                }
+                $arrDca      = $GLOBALS['TL_DCA'][$this->linkedTable];
 
                 $intCol = 0;
                 $intRow = 1;
 
                 // header
-                if ($this->objConfig->addHeaderToExportTable)
-                {
-                    foreach ($this->arrHeaderFields as $varValue)
-                    {
+                if ($this->objConfig->addHeaderToExportTable) {
+                    foreach ($this->arrHeaderFields as $varValue) {
                         $this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow($intCol, $intRow, $varValue);
                         $this->processHeaderRow($intCol);
                         $intCol++;
@@ -68,84 +60,75 @@ abstract class PhpExcelExporter extends Exporter
                 }
 
                 // body
+                if ($objDbResult->numRows > 0) {
 
-                while ($objDbResult->next())
-                {
-                    $arrRow = $objDbResult->row();
-                    $intCol = 0;
+                    while ($objDbResult->next()) {
+                        $arrRow = $objDbResult->row();
+                        $intCol = 0;
 
-                    $objDc               = new DC_HastePlus($this->linkedTable);
-                    $objDc->activeRecord = $objDbResult;
-                    $strId = $this->linkedTable . '.id';
-                    $objDc->id           = $objDbResult->{$strId};
+                        $objDc               = new DC_HastePlus($this->linkedTable);
+                        $objDc->activeRecord = $objDbResult;
+                        $strId               = $this->linkedTable . '.id';
+                        $objDc->id           = $objDbResult->{$strId};
 
-                    // trigger onload_callback since these could modify the dca
-                    if (is_array($arrDca['config']['onload_callback']))
-                    {
-                        foreach ($arrDca['config']['onload_callback'] as $callback)
-                        {
-                            if (is_array($callback))
-                            {
-                                if (!isset($arrOnload[implode(',', $callback)]))
-                                {
-                                    $arrOnload[implode(',', $callback)] = 0;
+                        // trigger onload_callback since these could modify the dca
+                        if (is_array($arrDca['config']['onload_callback'])) {
+                            foreach ($arrDca['config']['onload_callback'] as $callback) {
+                                if (is_array($callback)) {
+                                    if (!isset($arrOnload[implode(',', $callback)])) {
+                                        $arrOnload[implode(',', $callback)] = 0;
+                                    }
+
+                                    $this->import($callback[0]);
+                                    $this->{$callback[0]}->{$callback[1]}($objDc);
+                                } elseif (is_callable($callback)) {
+                                    $callback($objDc);
                                 }
+                            }
 
-                                $this->import($callback[0]);
-                                $this->{$callback[0]}->{$callback[1]}($objDc);
-                            }
-                            elseif (is_callable($callback))
-                            {
-                                $callback($objDc);
-                            }
+                            // refresh
+                            $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
                         }
 
-                        // refresh
-                        $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
+                        foreach ($arrRow as $key => $varValue) {
+                            $strField = str_replace($this->linkedTable . '.', '', $key);
+
+                            $varValue = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
+                                $varValue,
+                                $arrDca['fields'][$strField],
+                                $this->linkedTable,
+                                $objDc
+                            ) : $varValue;
+
+                            if (is_array($varValue)) {
+                                $varValue = Arrays::flattenArray($varValue);
+                            }
+
+                            if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'])
+                                && is_array(
+                                    $GLOBALS['TL_HOOKS']['exporter_modifyFieldValue']
+                                )
+                            ) {
+                                foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'] as $callback) {
+                                    $objCallback = \System::importStatic($callback[0]);
+                                    $varValue    = $objCallback->{$callback[1]}($varValue, $strField, $arrRow, $intCol);
+                                }
+                            }
+
+                            $this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(
+                                $intCol,
+                                $intRow,
+                                html_entity_decode($varValue)
+                            );
+
+                            $this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
+                            $this->processBodyRow($intCol);
+
+                            $intCol++;
+                        }
+                        $this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
+                        $intRow++;
                     }
-
-                    foreach ($arrRow as $key => $varValue)
-                    {
-                        $strField = str_replace($this->linkedTable . '.', '', $key);
-
-                        $varValue            = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
-                            $varValue,
-                            $arrDca['fields'][$strField],
-                            $this->linkedTable,
-                            $objDc
-                        ) : $varValue;
-
-                        if (is_array($varValue))
-                        {
-                            $varValue = Arrays::flattenArray($varValue);
-                        }
-
-                        if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'])
-                            && is_array(
-                                $GLOBALS['TL_HOOKS']['exporter_modifyFieldValue']
-                            )
-                        )
-                        {
-                            foreach ($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'] as $callback)
-                            {
-                                $objCallback      = \System::importStatic($callback[0]);
-                                $varValue = $objCallback->{$callback[1]}($varValue, $strField, $arrRow, $intCol);
-                            }
-                        }
-
-                        $this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(
-                            $intCol,
-                            $intRow,
-                            html_entity_decode($varValue)
-                        );
-
-                        $this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
-                        $this->processBodyRow($intCol);
-
-                        $intCol++;
-                    }
-                    $this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
-                    $intRow++;
                 }
 
                 $this->objPhpExcel->setActiveSheetIndex(0);

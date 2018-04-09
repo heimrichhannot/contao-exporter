@@ -23,9 +23,9 @@ class ExporterModel extends \Model
         $arrColumns[] = "($t.globalOperationKey='" . $strKey . "')";
         $arrColumns[] = "($t.linkedTable='" . $strTable . "')";
 
-        if (TL_MODE == 'BE' && ($intPid = \Input::get('id')) && !\Input::get('act'))
-        {
-            $arrColumns[] = "($t.restrictToPids REGEXP '\"$intPid\"' OR $t.restrictToPids IS NULL OR $t.restrictToPids = '' OR $t.restrictToPids = 'a:0:{}')";
+        if (TL_MODE == 'BE' && ($intPid = \Input::get('id')) && !\Input::get('act')) {
+            $arrColumns[]        = "($t.restrictToPids REGEXP '\"$intPid\"' OR $t.restrictToPids IS NULL OR $t.restrictToPids = '' OR $t.restrictToPids = 'a:0:{}')";
+            $arrOptions['order'] = "$t.restrictToPids DESC";
         }
 
         return static::findOneBy($arrColumns, null, $arrOptions);

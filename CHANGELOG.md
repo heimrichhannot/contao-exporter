@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.2.1] - 2018-02-27
+
+### Fixed
+- always export empty xls cheat with headers
+- order by `tl_exporter.restrictToPids` DESC to aquire correct exporter config 
+
 ## [4.2.0] - 2018-02-27
 
 ### Added
