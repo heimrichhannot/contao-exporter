@@ -243,7 +243,7 @@ abstract class Exporter extends \Controller
 
             if ($intPid && !$strAct && is_array($arrDca['fields']) && $arrDca['config']['ptable'])
             {
-                $arrWheres[] = 'pid = ' . $intPid;
+                $arrWheres[] = $this->linkedTable . '.pid = ' . $intPid;
             }
         }
 

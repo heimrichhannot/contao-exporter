@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.2.2] - 2018-09-07
+
+### Fixed
+- correct localization of fields from joined table
+- prefixed `restrictToPids` with `linkedTable`
+
 ## [4.2.1] - 2018-02-27
 
 ### Fixed

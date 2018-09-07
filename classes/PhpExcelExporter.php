@@ -91,12 +91,20 @@ abstract class PhpExcelExporter extends Exporter
                         }
 
                         foreach ($arrRow as $key => $varValue) {
-                            $strField = str_replace($this->linkedTable . '.', '', $key);
+                            $table = $this->linkedTable;
+                            
+                            // set current table in case of join to enable localization for every field
+                            if($this->addJoinTables)
+                            {
+                                $table = $this->getTableOnJoin($key);
+                            }
 
+                            $strField = str_replace($table . '.', '', $key);
+                            
                             $varValue = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
                                 $varValue,
                                 $arrDca['fields'][$strField],
-                                $this->linkedTable,
+                                $table,
                                 $objDc
                             ) : $varValue;
 
@@ -156,5 +164,29 @@ abstract class PhpExcelExporter extends Exporter
     public function exportToFile($objResult)
     {
 
+    }
+
+     /**
+     * get the table name if field comes from joined table
+     *
+     * @param $indicator
+     *
+     * @return mixed
+     */
+    protected function getTableOnJoin($indicator)
+    {
+        $table = $this->linkedTable;
+        
+        foreach(deserialize($this->joinTables,true) as $joinTable)
+        {
+            if(!strstr($indicator,$joinTable['joinTable']))
+            {
+                continue;
+            }
+            
+            return $joinTable['joinTable'];
+        }
+        
+        return $table;
     }
 }
