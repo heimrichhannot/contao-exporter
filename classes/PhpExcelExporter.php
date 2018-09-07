@@ -45,10 +45,10 @@ abstract class PhpExcelExporter extends Exporter
             case Exporter::TYPE_LIST:
                 $objDbResult = $this->getEntities();
                 $arrDca      = $GLOBALS['TL_DCA'][$this->linkedTable];
-
+                
                 $intCol = 0;
                 $intRow = 1;
-
+                
                 // header
                 if ($this->objConfig->addHeaderToExportTable) {
                     foreach ($this->arrHeaderFields as $varValue) {
@@ -58,19 +58,16 @@ abstract class PhpExcelExporter extends Exporter
                     }
                     $intRow++;
                 }
-
+                
                 // body
                 if ($objDbResult->numRows > 0) {
-
+                    
                     while ($objDbResult->next()) {
                         $arrRow = $objDbResult->row();
                         $intCol = 0;
-
-                        $objDc               = new DC_HastePlus($this->linkedTable);
-                        $objDc->activeRecord = $objDbResult;
-                        $strId               = $this->linkedTable . '.id';
-                        $objDc->id           = $objDbResult->{$strId};
-
+                        
+                        $objDc = $this->getDCTable($this->linkedTable, $objDbResult);
+                        
                         // trigger onload_callback since these could modify the dca
                         if (is_array($arrDca['config']['onload_callback'])) {
                             foreach ($arrDca['config']['onload_callback'] as $callback) {
@@ -78,27 +75,31 @@ abstract class PhpExcelExporter extends Exporter
                                     if (!isset($arrOnload[implode(',', $callback)])) {
                                         $arrOnload[implode(',', $callback)] = 0;
                                     }
-
+                                    
                                     $this->import($callback[0]);
                                     $this->{$callback[0]}->{$callback[1]}($objDc);
                                 } elseif (is_callable($callback)) {
                                     $callback($objDc);
                                 }
                             }
-
+                            
                             // refresh
                             $arrDca = $GLOBALS['TL_DCA'][$this->linkedTable];
                         }
-
+                        
                         foreach ($arrRow as $key => $varValue) {
                             $table = $this->linkedTable;
                             
                             // set current table in case of join to enable localization for every field
-                            if($this->addJoinTables)
-                            {
+                            if ($this->addJoinTables) {
                                 $table = $this->getTableOnJoin($key);
                             }
-
+                            
+                            if ($table != $this->linkedTable) {
+                                $objDc  = $this->getDCTable($table, $objDbResult);
+                                $arrDca = $GLOBALS['TL_DCA'][$table];
+                            }
+                            
                             $strField = str_replace($table . '.', '', $key);
                             
                             $varValue = $this->localizeFields ? FormSubmission::prepareSpecialValueForPrint(
@@ -107,11 +108,11 @@ abstract class PhpExcelExporter extends Exporter
                                 $table,
                                 $objDc
                             ) : $varValue;
-
+                            
                             if (is_array($varValue)) {
                                 $varValue = Arrays::flattenArray($varValue);
                             }
-
+                            
                             if (isset($GLOBALS['TL_HOOKS']['exporter_modifyFieldValue'])
                                 && is_array(
                                     $GLOBALS['TL_HOOKS']['exporter_modifyFieldValue']
@@ -122,30 +123,32 @@ abstract class PhpExcelExporter extends Exporter
                                     $varValue    = $objCallback->{$callback[1]}($varValue, $strField, $arrRow, $intCol);
                                 }
                             }
-
+                            
                             $this->objPhpExcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(
                                 $intCol,
                                 $intRow,
                                 html_entity_decode($varValue)
                             );
-
-                            $this->objPhpExcel->getActiveSheet()->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))->setAutoSize(true);
+                            
+                            $this->objPhpExcel->getActiveSheet()
+                                ->getColumnDimension(\PHPExcel_Cell::stringFromColumnIndex($intCol))
+                                ->setAutoSize(true);
                             $this->processBodyRow($intCol);
-
+                            
                             $intCol++;
                         }
                         $this->objPhpExcel->getActiveSheet()->getRowDimension($intRow)->setRowHeight(-1);
                         $intRow++;
                     }
                 }
-
+                
                 $this->objPhpExcel->setActiveSheetIndex(0);
                 $this->objPhpExcel->getActiveSheet()->setTitle('Export');
-
+                
                 return $this->objPhpExcel;
                 break;
         }
-
+        
         return false;
     }
 
@@ -189,4 +192,20 @@ abstract class PhpExcelExporter extends Exporter
         
         return $table;
     }
+
+    /**
+     * @param $table
+     * @param $result
+     *
+     * @return DC_HastePlus
+     */
+    protected function getDCTable($table, $result)
+    {
+        $objDc               = new DC_HastePlus($table);
+        $objDc->activeRecord = $result;
+        $strId               = $table . '.id';
+        $objDc->id           = $result->{$strId};
+        
+        return $objDc;
+    } 	
 }
