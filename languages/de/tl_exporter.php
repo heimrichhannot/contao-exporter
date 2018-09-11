@@ -54,6 +54,7 @@ $arrLang['pdfFonts'] = ['Schriften', 'Wählen Sie hier die Schriften aus, die im
 $arrLang['exporter_pdfFonts_fontName'] = ['Schriftname', 'Geben Sie hier den Namen der Schrift ein, der im CSS verwendet werden soll. WICHTIG: Bitte beachten Sie, dass jedes Zeichen in Kleinbuchstaben konvertiert word und Leerzeichen entfernt werden!'];
 $arrLang['exporter_pdfFonts_fontWeight'] = ['Gewicht', 'Wählen Sie hier das Gewicht der Schrift aus. Im CSS sprechen Sie die Gewichte wie gewohnt mit bspw. "font-weight: bold" an.'];
 $arrLang['exporter_pdfFonts_file'] = ['Schriftdatei', 'Wählen Sie hier die TrueType-Schrift (*.ttf) aus, die dem Gewicht entspricht.'];
+$arrLang['ignoreOnloadCallbacks'] = ['Onload-Callbacks ignorieren', 'Wählen Sie diese Option, wenn die onload_callbacks der zu exportierenden Entitäten irgnoriert werden sollen.'];
 
 
 // header

@@ -87,9 +87,9 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
         ],
         'default'                                    => '{title_legend},title,type;',
         \HeimrichHannot\Exporter\Exporter::TYPE_LIST => '{title_legend},title,type;' . '{export_legend},target,fileType;'
-                                                        . '{table_legend},globalOperationKey,linkedTable,addJoinTables,addUnformattedFields,tableFieldsForExport,restrictToPids,whereClause,orderBy;',
+                                                        . '{table_legend},globalOperationKey,linkedTable,addJoinTables,ignoreOnloadCallbacks,addUnformattedFields,tableFieldsForExport,restrictToPids,whereClause,orderBy;',
         \HeimrichHannot\Exporter\Exporter::TYPE_ITEM => '{title_legend},title,type;' . '{export_legend},target,fileType;'
-                                                        . '{table_legend},linkedTable,addJoinTables,skipFields,skipLabels,whereClause,orderBy;',
+                                                        . '{table_legend},linkedTable,addJoinTables,ignoreOnloadCallbacks,skipFields,skipLabels,whereClause,orderBy;',
     ],
 
     // Subpalettes
@@ -595,6 +595,15 @@ $GLOBALS['TL_DCA']['tl_exporter'] = [
             'inputType' => 'text',
             'eval'      => ['maxlength' => 64, 'tl_class' => 'w50'],
             'sql'       => "varchar(64) NOT NULL default ''",
+        ],
+	'ignoreOnloadCallbacks'     => [
+            'label'     => &$GLOBALS['TL_LANG']['tl_exporter']['ignoreOnloadCallbacks'],
+            'exclude'   => true,
+            'inputType' => 'checkbox',
+            'eval'      => [
+                'tl_class' => 'w50 clr',
+            ],
+            'sql'       => "char(1) NOT NULL default ''",
         ],
     ],
 ];

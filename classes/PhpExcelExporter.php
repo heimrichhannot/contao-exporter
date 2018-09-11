@@ -69,7 +69,7 @@ abstract class PhpExcelExporter extends Exporter
                         $objDc = $this->getDCTable($this->linkedTable, $objDbResult);
                         
                         // trigger onload_callback since these could modify the dca
-                        if (is_array($arrDca['config']['onload_callback'])) {
+                        if (!$this->ignoreOnloadCallbacks && is_array($arrDca['config']['onload_callback'])) {
                             foreach ($arrDca['config']['onload_callback'] as $callback) {
                                 if (is_array($callback)) {
                                     if (!isset($arrOnload[implode(',', $callback)])) {
