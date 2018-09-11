@@ -89,6 +89,9 @@ abstract class PhpExcelExporter extends Exporter
                         
                         foreach ($arrRow as $key => $varValue) {
                             $table = $this->linkedTable;
+			
+			    $objDc  = $this->getDCTable($table, $objDbResult);
+                            $arrDca = $GLOBALS['TL_DCA'][$table];	
                             
                             // set current table in case of join to enable localization for every field
                             if ($this->addJoinTables) {

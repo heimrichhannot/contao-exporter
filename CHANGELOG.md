@@ -1,6 +1,11 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [4.2.5] - 2018-09-11
+
+### Fixed
+- reset `$objDc` and `$arrDca` on field preparation for export
+
 ## [4.2.2] - 2018-09-07
 
 ### Fixed
